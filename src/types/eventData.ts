@@ -1,4 +1,4 @@
-import { CbEvents } from '..';
+import { CbEvents } from '@/constant';
 import {
   BlackUserItem,
   ConversationInputStatus,
