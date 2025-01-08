@@ -74,6 +74,7 @@ import {
   GetSpecifiedFriendsParams,
   ChangeInputStatesParams,
   GetInputstatesParams,
+  FetchSurroundingParams,
 } from '../types/params';
 
 import {
@@ -296,6 +297,16 @@ class SDK extends Emitter {
     return this._invoker<AdvancedGetMessageResult>(
       'getAdvancedHistoryMessageListReverse',
       window.getAdvancedHistoryMessageListReverse,
+      [operationID, JSON.stringify(params)]
+    );
+  };
+  fetchSurroundingMessages = (
+    params: FetchSurroundingParams,
+    operationID = uuidv4()
+  ) => {
+    return this._invoker<{ messageList: MessageItem[] }>(
+      'fetchSurroundingMessages',
+      window.fetchSurroundingMessages,
       [operationID, JSON.stringify(params)]
     );
   };

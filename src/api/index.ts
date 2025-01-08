@@ -238,6 +238,9 @@ export function initDatabaseAPI(isLogStandardOutput = true): void {
   window.getAlreadyExistSeqList = registeMethodOnWindow(
     'getAlreadyExistSeqList'
   );
+  window.getLatestValidServerMessage = registeMethodOnWindow(
+    'getLatestValidServerMessage'
+  );
   window.getMessageBySeq = registeMethodOnWindow('getMessageBySeq');
   window.getMessagesByClientMsgIDs = registeMethodOnWindow(
     'getMessagesByClientMsgIDs'

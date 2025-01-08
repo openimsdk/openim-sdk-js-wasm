@@ -132,3 +132,7 @@ export enum GroupMessageReaderFilter {
   Read = 0,
   UnRead = 1,
 }
+export enum ViewType {
+  History = 0,
+  Search = 1,
+}
