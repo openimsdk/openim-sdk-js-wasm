@@ -158,6 +158,7 @@ import {
   getPageFriendList,
   getGroupMemberAllGroupIDs,
   getAlreadyExistSeqList,
+  getLatestValidServerMessage,
   markConversationAllMessageAsRead,
   searchAllMessageByContentType,
   deleteConversationMsgs,
@@ -249,6 +250,7 @@ rpc.registerMethod(
   updateMsgSenderFaceURLAndSenderNickname
 );
 rpc.registerMethod('getAlreadyExistSeqList', getAlreadyExistSeqList);
+rpc.registerMethod('getLatestValidServerMessage', getLatestValidServerMessage);
 rpc.registerMethod('getMessageBySeq', getMessageBySeq);
 rpc.registerMethod('getMessagesByClientMsgIDs', getMessagesByClientMsgIDs);
 rpc.registerMethod('getMessagesBySeqs', getMessagesBySeqs);

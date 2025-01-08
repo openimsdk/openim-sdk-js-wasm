@@ -586,3 +586,22 @@ export function getLatestActiveMessage(
     `
   );
 }
+
+export function getLatestValidServerMessage(
+  db: Database,
+  conversationID: string,
+  startTime: number,
+  isReverse: boolean
+): QueryExecResult[] {
+  _initLocalChatLogsTable(db, conversationID);
+  const order = isReverse ? 'ASC' : 'DESC';
+  return db.exec(
+    `
+      SELECT * FROM 'chat_logs_${conversationID}' WHERE send_time ${
+      isReverse ? '<' : '>'
+    } ${startTime} AND seq != 0 ORDER BY send_time ${
+      isReverse ? 'DESC' : 'ASC'
+    } LIMIT 1
+    `
+  );
+}

@@ -3,6 +3,7 @@ import {
   ClientMessage,
   getMessage as databaseGetMessage,
   getAlreadyExistSeqList as databaseGetAlreadyExistSeqList,
+  getLatestValidServerMessage as databaseGetLatestValidServerMessage,
   getMessageBySeq as databaseGetMessageBySeq,
   getMessagesByClientMsgIDs as databaseGetMessagesByClientMsgIDs,
   getMessagesBySeqs as databaseGetMessagesBySeqs,
@@ -96,6 +97,47 @@ export async function getAlreadyExistSeqList(
         'isExternalExtensions',
       ]).map(item => item.seq) ?? []
     );
+  } catch (e) {
+    console.error(e);
+
+    return formatResponse(
+      undefined,
+      DatabaseErrorCode.ErrorInit,
+      JSON.stringify(e)
+    );
+  }
+}
+
+export async function getLatestValidServerMessage(
+  conversationID: string,
+  startTime: number,
+  isReverse: boolean
+): Promise<string> {
+  try {
+    const db = await getInstance();
+
+    const execResult = databaseGetLatestValidServerMessage(
+      db,
+      conversationID,
+      startTime,
+      isReverse
+    );
+
+    const message = converSqlExecResult(execResult[0], 'CamelCase', [
+      'isRead',
+      'isReact',
+      'isExternalExtensions',
+    ])[0];
+
+    if (!message) {
+      return formatResponse(
+        '',
+        DatabaseErrorCode.ErrorNoRecord,
+        `no message with conversationID ${conversationID}`
+      );
+    }
+
+    return formatResponse(message);
   } catch (e) {
     console.error(e);
 
