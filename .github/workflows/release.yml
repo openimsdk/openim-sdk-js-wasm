@@ -27,20 +27,6 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Extract version from tag or dispatch
-        id: get_version
-        run: |
-          if [ "${{ github.event_name }}" == "push" ]; then
-            echo "Version from tag ${GITHUB_REF##*/}"
-            echo "::set-output name=version::${GITHUB_REF##*/v}"
-          elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            echo "Version from dispatch input ${{ github.event.inputs.version }}"
-            echo "::set-output name=version::${{ github.event.inputs.version }}"
-          fi
-
-      - name: Update version in package.json
-        run: npm version ${{ steps.get_version.outputs.version }} --no-git-tag-version
-
       - name: Build
         run: npm run build
 
