@@ -62,7 +62,7 @@ export async function init(userId: string, dir: string): Promise<string> {
       localConversationUnreadMessages(db);
     const execResultLocalAppSDKVersions = localAppSDKVersions(db);
     const execResultLocalVersionSync = localVersionSyncs(db);
-    alterTable(db);
+    await alterTable(db);
     results.push(
       ...[
         execResultLocalUploads,

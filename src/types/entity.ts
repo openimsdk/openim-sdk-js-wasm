@@ -240,7 +240,8 @@ export type MessageItem = {
   notificationElem?: NotificationElem;
   advancedTextElem?: AdvancedTextElem;
   typingElem?: TypingElem;
-  attachedInfoElem: AttachedInfoElem;
+  attachedInfoElem?: AttachedInfoElem;
+  streamElem?: StreamElem;
 };
 export type TextElem = {
   content: string;
@@ -308,6 +309,11 @@ export type PictureElem = {
   bigPicture: Picture;
   snapshotPicture: Picture;
 };
+export type ModifiedInfo = {
+  modifiedCount: number;
+  modifiedTime: number;
+  userID: string;
+};
 export type AttachedInfoElem = {
   groupHasReadInfo: GroupHasReadInfo;
   isPrivateChat: boolean;
@@ -315,8 +321,15 @@ export type AttachedInfoElem = {
   inEncryptStatus: boolean;
   burnDuration: number;
   hasReadTime: number;
+  lastModified?: ModifiedInfo;
   messageEntityList?: MessageEntity[];
   uploadProgress?: UploadProgress;
+};
+export type StreamElem = {
+  content: string;
+  type: string;
+  packets: string[];
+  end: boolean;
 };
 export type UploadProgress = {
   total: number;

@@ -43,6 +43,7 @@ export type EventDataMap = {
   [CbEvents.OnRecvGroupReadReceipt]: GroupMessageReceiptInfo;
   [CbEvents.OnRecvNewMessage]: MessageItem;
   [CbEvents.OnRecvNewMessages]: MessageItem[];
+  [CbEvents.OnMessageModified]: MessageItem;
   [CbEvents.OnRecvOfflineNewMessage]: MessageItem;
   [CbEvents.OnRecvOnlineOnlyMessage]: MessageItem;
   [CbEvents.OnRecvOfflineNewMessages]: MessageItem[];

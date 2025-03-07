@@ -36,6 +36,7 @@ export function localChatLogsConversationID(
         'is_react' tinyint(1),
         'is_external_extensions' tinyint(1),
         'msg_first_modify_time' int,
+        'dst_user_ids' text,
         PRIMARY KEY ('client_msg_id')
       );
       `
@@ -87,7 +88,7 @@ export function getMessageList(
     //   !isReverse ? 'DESC' : 'ASC'
     // } LIMIT ${count}
     // `
-    `
+    ` 
     SELECT * FROM 'chat_logs_${conversationID}'
     WHERE
       send_time ${!isReverse ? '<' : '>'} ${startTime}
@@ -111,6 +112,7 @@ export function getMessageBySeq(
   seq: number
 ): QueryExecResult[] {
   _initLocalChatLogsTable(db, conversationID);
+
   return db.exec(
     `
     SELECT * FROM 'chat_logs_${conversationID}' WHERE seq = ${seq} limit 1;
@@ -138,6 +140,7 @@ export function getMessagesBySeqs(
   seqs: number[]
 ): QueryExecResult[] {
   _initLocalChatLogsTable(db, conversationID);
+
   return db.exec(
     `
     SELECT * FROM 'chat_logs_${conversationID}' WHERE seq in (${seqs.join(
@@ -154,6 +157,7 @@ export function getMessageListNoTime(
   isReverse: boolean
 ): QueryExecResult[] {
   _initLocalChatLogsTable(db, conversationID);
+
   return db.exec(
     `
     SELECT * FROM 'chat_logs_${conversationID}' ORDER BY send_time ${
@@ -168,6 +172,7 @@ export function getConversationNormalMsgSeq(
   conversationID: string
 ): QueryExecResult[] {
   _initLocalChatLogsTable(db, conversationID);
+
   return db.exec(
     `
       SELECT seq FROM 'chat_logs_${conversationID}' order by seq desc limit 1;
@@ -249,6 +254,15 @@ export function batchInsertMessageList(
   messageList: ClientMessage[]
 ): QueryExecResult[] {
   _initLocalChatLogsTable(db, conversationID);
+
+  messageList.map(message => {
+    if (message.dst_user_ids === null || message.dst_user_ids === undefined) {
+      message.dst_user_ids = '';
+    } else {
+      message.dst_user_ids = JSON.stringify(message.dst_user_ids);
+    }
+  });
+
   const sql = squel
     .insert()
     .into(`'chat_logs_${conversationID}'`)
@@ -262,6 +276,15 @@ export function insertMessage(
   conversationID: string,
   localChatLogs: ClientMessage
 ): QueryExecResult[] {
+  if (
+    localChatLogs.dst_user_ids === null ||
+    localChatLogs.dst_user_ids === undefined
+  ) {
+    localChatLogs.dst_user_ids = '';
+  } else {
+    localChatLogs.dst_user_ids = JSON.stringify(localChatLogs.dst_user_ids);
+  }
+
   const sql = squel
     .insert()
     .into(`'chat_logs_${conversationID}'`)
@@ -392,34 +415,6 @@ export function messageIfExists(
   );
 }
 
-// export function MessageIfExistsBySeq(
-//     db: Database,
-//     conversationID: string,
-//     seq: number
-// ): QueryExecResult[] {
-//     return db.exec(
-//         `
-//       SELECT * FROM 'chat_logs_${conversationID}' WHERE seq = ${seq};
-//       `
-//     );
-// }
-
-// export function UpdateGroupMessageHasRead(
-//     db: Database,
-// )
-
-// export function getMultipleMessage(
-//     db: Database,
-// )
-
-// export function updateMsgSenderNickname(
-//     db: Database,
-// )
-
-// export function updateMsgSenderFaceURL(
-//     db: Database,
-// )
-
 export function updateMsgSenderFaceURLAndSenderNickname(
   db: Database,
   conversationID: string,
@@ -428,36 +423,13 @@ export function updateMsgSenderFaceURLAndSenderNickname(
   nickname: string
 ): QueryExecResult[] {
   _initLocalChatLogsTable(db, conversationID);
+
   return db.exec(
     `
       UPDATE 'chat_logs_${conversationID}' SET sender_face_url = '${faceURL}', sender_nick_name = '${nickname}' WHERE send_id = '${sendID}';
       `
   );
 }
-
-// export function getMsgSeqByClientMsgID(
-//     db: Database,
-// )
-
-// export function getMsgSeqListByGroupID(
-//     db: Database,
-// )
-
-// export function getMsgSeqListByPeerUserID(
-//     db: Database,
-// )
-
-// export function getMsgSeqListBySelfUserID(
-//     db: Database,
-// )
-
-// export function deleteAllMessage(
-//     db: Database,
-// )
-
-// export function getAllUnDeleteMessageSeqList(
-//     db: Database,
-// )
 
 export function deleteConversationAllMessages(
   db: Database,
@@ -500,6 +472,7 @@ export function markConversationMessageAsReadBySeqs(
   loginUserID: string
 ): QueryExecResult[] {
   _initLocalChatLogsTable(db, conversationID);
+
   const values = seqList.map(v => `${v}`).join(',');
   return db.exec(
     `
@@ -550,18 +523,6 @@ export function deleteConversationMsgs(
   );
 }
 
-// export function updateSingleMessageHasRead(
-//     db: Database,
-// )
-
-// export function updateGroupMessageHasRead(
-//     db: Database,
-// )
-
-// export function updateMessageStatusBySourceID(
-//     db: Database,
-// )
-
 export function markConversationAllMessageAsRead(
   db: Database,
   conversationID: string,
@@ -573,10 +534,6 @@ export function markConversationAllMessageAsRead(
       `
   );
 }
-
-// export function deleteConversationMsgsBySeqs(
-//     db: Database,
-// )
 
 export function searchAllMessageByContentType(
   db: Database,
@@ -596,10 +553,12 @@ export function getLatestActiveMessage(
   isReverse: boolean
 ): QueryExecResult[] {
   _initLocalChatLogsTable(db, conversationID);
-  const order = isReverse ? 'ASC' : 'DESC';
+
   return db.exec(
     `
-      SELECT * FROM 'chat_logs_${conversationID}' WHERE status < 4 ORDER BY send_time ${order};
+      SELECT * FROM 'chat_logs_${conversationID}' WHERE status < 4 ORDER BY send_time ${
+      isReverse ? 'ASC' : 'DESC'
+    };
     `
   );
 }
@@ -611,7 +570,7 @@ export function getLatestValidServerMessage(
   isReverse: boolean
 ): QueryExecResult[] {
   _initLocalChatLogsTable(db, conversationID);
-  const order = isReverse ? 'ASC' : 'DESC';
+
   return db.exec(
     `
       SELECT * FROM 'chat_logs_${conversationID}' WHERE send_time ${

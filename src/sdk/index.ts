@@ -75,6 +75,8 @@ import {
   ChangeInputStatesParams,
   GetInputstatesParams,
   FetchSurroundingParams,
+  CreateTargetedGroupMessageParams,
+  ModifyMessageParams,
 } from '../types/params';
 
 import {
@@ -1722,6 +1724,35 @@ class SDK extends Emitter {
           msgDestructTime: data.msgDestructTime,
         }),
       ]
+    );
+  };
+  createTargetedGroupMessage = (
+    params: CreateTargetedGroupMessageParams,
+    operationID = uuidv4()
+  ) => {
+    return this._invoker<MessageItem>(
+      'createTargetedGroupMessage',
+      window.createTargetedGroupMessage,
+      [
+        operationID,
+        JSON.stringify(params.message),
+        JSON.stringify(params.dstUserIDs),
+      ],
+      data => {
+        // compitable with old version sdk
+        return data[0];
+      }
+    );
+  };
+  modifyMessage = (params: ModifyMessageParams, operationID = uuidv4()) => {
+    return this._invoker<MessageItem>(
+      'modifyMessage',
+      window.modifyMessage,
+      [operationID, JSON.stringify(params)],
+      data => {
+        // compitable with old version sdk
+        return data[0];
+      }
     );
   };
   fileMapSet = (uuid: string, file: File) => window.fileMapSet(uuid, file);

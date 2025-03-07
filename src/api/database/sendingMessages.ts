@@ -67,11 +67,13 @@ export async function getAllSendingMessages(): Promise<string> {
     const execResult = datbaseGetAllSendingMessages(db);
 
     return formatResponse(
-      converSqlExecResult(execResult[0], 'CamelCase', [
-        'isRead',
-        'isReact',
-        'isExternalExtensions',
-      ])
+      converSqlExecResult(
+        execResult[0],
+        'CamelCase',
+        ['isRead', 'isReact', 'isExternalExtensions'],
+        undefined,
+        ['dstUserIDs']
+      )
     );
   } catch (e) {
     console.error(e);

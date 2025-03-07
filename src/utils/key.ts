@@ -18,6 +18,7 @@ const InternalConstraint = [
   ['is_react', 'isReact'],
   ['is_external_extensions', 'isExternalExtensions'],
   ['msg_first_modify_time', 'msgFirstModifyTime'],
+  ['dst_user_ids', 'dstUserIDs'],
   ['status', 'status'],
   ['seq', 'seq'],
   ['send_time', 'sendTime'],

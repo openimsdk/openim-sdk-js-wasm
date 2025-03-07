@@ -830,6 +830,8 @@ declare global {
     signalingSendCustomSignal: (...args) => Promise<string>;
     setConversationIsMsgDestruct: (...args) => Promise<string>;
     setConversationMsgDestructTime: (...args) => Promise<string>;
+    createTargetedGroupMessage: (...args) => Promise<string>;
+    modifyMessage: (...args) => Promise<string>;
 
     // debug
     exec: (sql: string) => Promise<any>;

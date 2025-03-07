@@ -419,3 +419,13 @@ export type SetConversationMsgDestructTimeParams = {
   conversationID: string;
   msgDestructTime: number;
 };
+
+export type CreateTargetedGroupMessageParams = {
+  message: MessageItem;
+  dstUserIDs: string[];
+};
+
+export type ModifyMessageParams = {
+  message: MessageItem;
+  conversationID: string;
+};

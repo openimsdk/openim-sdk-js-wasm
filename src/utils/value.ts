@@ -11,7 +11,8 @@ export function converSqlExecResult(
   record: QueryExecResult,
   keyType: KeyType = 'CamelCase',
   booleanKeys: string[] = [],
-  convertMap: Record<string, string> = {}
+  convertMap: Record<string, string> = {},
+  string2ArrayKeys: string[] = []
 ) {
   const { columns = [], values = [] } = record || {};
   const result: Record<string, unknown>[] = [];
@@ -30,6 +31,9 @@ export function converSqlExecResult(
       }
       if (booleanKeys.find(bk => bk === ck)) {
         cv = !!cv;
+      }
+      if (string2ArrayKeys.find(sak => sak === ck)) {
+        cv = cv ? JSON.parse(cv as string) : [];
       }
 
       ck = convertMap[k] || ck;
