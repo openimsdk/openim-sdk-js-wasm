@@ -91,7 +91,9 @@ import {
   GroupMemberItem,
   IMConfig,
   MessageItem,
+  OfflinePush,
   PublicUserItem,
+  RtcInvite,
   RtcInviteResults,
   SearchedFriendsInfo,
   SearchMessageResult,
@@ -1673,7 +1675,10 @@ class SDK extends Emitter {
     );
   };
   getSignalingInvitationInfoStartApp = (operationID = uuidv4()) => {
-    return this._invoker<RtcInviteResults>(
+    return this._invoker<{
+      invitation: RtcInvite | null;
+      offlinePushInfo: OfflinePush;
+    }>(
       'getSignalingInvitationInfoStartApp ',
       window.getSignalingInvitationInfoStartApp,
       [operationID]

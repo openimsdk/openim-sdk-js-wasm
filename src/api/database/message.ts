@@ -153,6 +153,8 @@ export async function getMessageList(
   conversationID: string,
   count: number,
   startTime: number,
+  startSeq: number,
+  startClientMsgID: string,
   isReverse = false
 ): Promise<string> {
   if (startTime <= 0) {
@@ -166,6 +168,8 @@ export async function getMessageList(
       conversationID,
       count,
       startTime,
+      startSeq,
+      startClientMsgID,
       isReverse
     );
 

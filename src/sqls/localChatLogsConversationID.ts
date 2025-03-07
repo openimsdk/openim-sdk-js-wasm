@@ -75,15 +75,32 @@ export function getMessageList(
   conversationID: string,
   count: number,
   startTime: number,
+  startSeq: number,
+  startClientMsgID: string,
   isReverse: boolean
 ): QueryExecResult[] {
   return db.exec(
+    // `
+    // SELECT * FROM 'chat_logs_${conversationID}' WHERE send_time ${
+    //   !isReverse ? '<' : '>'
+    // } ${startTime} ORDER BY send_time ${
+    //   !isReverse ? 'DESC' : 'ASC'
+    // } LIMIT ${count}
+    // `
     `
-    SELECT * FROM 'chat_logs_${conversationID}' WHERE send_time ${
-      !isReverse ? '<' : '>'
-    } ${startTime} ORDER BY send_time ${
-      !isReverse ? 'DESC' : 'ASC'
-    } LIMIT ${count}
+    SELECT * FROM 'chat_logs_${conversationID}'
+    WHERE
+      send_time ${!isReverse ? '<' : '>'} ${startTime}
+      OR (
+        send_time = ${startTime} AND (
+          seq ${!isReverse ? '<' : '>'} ${startSeq}
+          OR (seq = 0 AND client_msg_id != '${startClientMsgID}')
+        )
+      )
+    ORDER BY
+      send_time ${!isReverse ? 'DESC' : 'ASC'},
+      seq ${!isReverse ? 'DESC' : 'ASC'}
+    LIMIT ${count}
     `
   );
 }
