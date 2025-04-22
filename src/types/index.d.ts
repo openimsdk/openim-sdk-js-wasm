@@ -57,6 +57,7 @@ declare global {
     updateMessageStatusBySourceID: DatabaseApi;
     getAlreadyExistSeqList: DatabaseApi;
     getLatestValidServerMessage: DatabaseApi;
+    getMessageByUserID: DatabaseApi;
     getMessageBySeq: DatabaseApi;
     getMessagesByClientMsgIDs: DatabaseApi;
     getMessagesBySeqs: DatabaseApi;
@@ -67,6 +68,7 @@ declare global {
     markDeleteConversationAllMessages: DatabaseApi;
     getUnreadMessage: DatabaseApi;
     markConversationMessageAsReadBySeqs: DatabaseApi;
+    deleteMessagesByClientMsgIDs: DatabaseApi;
     markConversationMessageAsReadDB: DatabaseApi;
     deleteConversationMsgs: DatabaseApi;
     markConversationAllMessageAsRead: DatabaseApi;
@@ -498,6 +500,16 @@ declare global {
       operationID: string,
       conversationID: string,
       clientMsgID: string
+    ) => Promise<string>;
+    deleteMessages: (
+      operationID: string,
+      conversationID: string,
+      clientMsgID: string
+    ) => Promise<string>;
+    deleteUserAllMessagesInConv: (
+      operationID: string,
+      conversationID: string,
+      userID: string
     ) => Promise<string>;
     deleteAllConversationFromLocal: (operationID: string) => Promise<string>;
     deleteAllMsgFromLocal: (operationID: string) => Promise<string>;

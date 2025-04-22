@@ -481,6 +481,19 @@ export function markConversationMessageAsReadBySeqs(
   );
 }
 
+export function deleteMessagesByClientMsgIDs(
+  db: Database,
+  conversationID: string,
+  clientMsgIDs: string[]
+): QueryExecResult[] {
+  const values = clientMsgIDs.map(v => `'${v}'`).join(',');
+  return db.exec(
+    `
+      UPDATE 'chat_logs_${conversationID}' SET status=4  WHERE client_msg_id IN (${values});
+      `
+  );
+}
+
 export function markConversationMessageAsRead(
   db: Database,
   conversationID: string,
@@ -579,5 +592,19 @@ export function getLatestValidServerMessage(
       isReverse ? 'DESC' : 'ASC'
     } LIMIT 1
     `
+  );
+}
+
+export function getMessageByUserID(
+  db: Database,
+  conversationID: string,
+  userID: string
+): QueryExecResult[] {
+  _initLocalChatLogsTable(db, conversationID);
+
+  return db.exec(
+    `
+      SELECT * FROM 'chat_logs_${conversationID}' WHERE send_id = '${userID}';
+      `
   );
 }

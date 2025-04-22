@@ -241,6 +241,7 @@ export function initDatabaseAPI(isLogStandardOutput = true): void {
   window.getLatestValidServerMessage = registeMethodOnWindow(
     'getLatestValidServerMessage'
   );
+  window.getMessageByUserID = registeMethodOnWindow('getMessageByUserID');
   window.getMessageBySeq = registeMethodOnWindow('getMessageBySeq');
   window.getMessagesByClientMsgIDs = registeMethodOnWindow(
     'getMessagesByClientMsgIDs'
@@ -267,6 +268,9 @@ export function initDatabaseAPI(isLogStandardOutput = true): void {
   );
   window.markConversationMessageAsReadDB = registeMethodOnWindow(
     'markConversationMessageAsRead'
+  );
+  window.deleteMessagesByClientMsgIDs = registeMethodOnWindow(
+    'deleteMessagesByClientMsgIDs'
   );
   window.deleteConversationMsgs = registeMethodOnWindow(
     'deleteConversationMsgs'

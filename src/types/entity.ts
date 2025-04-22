@@ -241,6 +241,7 @@ export type MessageItem = {
   advancedTextElem?: AdvancedTextElem;
   typingElem?: TypingElem;
   attachedInfoElem?: AttachedInfoElem;
+  markdownTextElem?: MarkdownTextElem;
   streamElem?: StreamElem;
 };
 export type TextElem = {
@@ -324,6 +325,9 @@ export type AttachedInfoElem = {
   lastModified?: ModifiedInfo;
   messageEntityList?: MessageEntity[];
   uploadProgress?: UploadProgress;
+};
+export type MarkdownTextElem = {
+  text: string;
 };
 export type StreamElem = {
   content: string;

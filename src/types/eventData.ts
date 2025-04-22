@@ -41,6 +41,11 @@ export type EventDataMap = {
   [CbEvents.OnNewRecvMessageRevoked]: RevokedInfo;
   [CbEvents.OnRecvC2CReadReceipt]: ReceiptInfo[];
   [CbEvents.OnRecvGroupReadReceipt]: GroupMessageReceiptInfo;
+  [CbEvents.OnMsgDeleted]: MessageItem;
+  [CbEvents.OnDeleteUserAllMsgsInConv]: {
+    conversationID: string;
+    userID: string;
+  };
   [CbEvents.OnRecvNewMessage]: MessageItem;
   [CbEvents.OnRecvNewMessages]: MessageItem[];
   [CbEvents.OnMessageModified]: MessageItem;

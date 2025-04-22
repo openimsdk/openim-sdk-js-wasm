@@ -264,6 +264,11 @@ export type AccessMessageParams = {
   conversationID: string;
   clientMsgID: string;
 };
+export type DeleteMessagesParams = {
+  conversationID: string;
+  clientMsgIDs: string[];
+  isSync: boolean;
+};
 export type TypingUpdateParams = {
   recvID: string;
   msgTip: string;

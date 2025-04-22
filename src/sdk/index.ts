@@ -77,6 +77,7 @@ import {
   FetchSurroundingParams,
   CreateTargetedGroupMessageParams,
   ModifyMessageParams,
+  DeleteMessagesParams,
 } from '../types/params';
 
 import {
@@ -1755,6 +1756,27 @@ class SDK extends Emitter {
       }
     );
   };
+  deleteMessages = <T>(data: DeleteMessagesParams, operationID = uuidv4()) => {
+    return this._invoker<T>('deleteMessages ', window.deleteMessages, [
+      operationID,
+      JSON.stringify(data),
+    ]);
+  };
+
+  deleteUserAllMessagesInConv = <T>(
+    data: {
+      conversationID: string;
+      userID: string;
+    },
+    operationID = uuidv4()
+  ) => {
+    return this._invoker<T>(
+      'deleteUserAllMessagesInConv ',
+      window.deleteUserAllMessagesInConv,
+      [operationID, data.conversationID, data.userID]
+    );
+  };
+
   fileMapSet = (uuid: string, file: File) => window.fileMapSet(uuid, file);
 }
 

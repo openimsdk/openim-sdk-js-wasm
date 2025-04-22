@@ -14,6 +14,8 @@ export enum CbEvents {
   OnUserTokenExpired = 'OnUserTokenExpired',
   OnUserTokenInvalid = 'OnUserTokenInvalid',
   OnProgress = 'OnProgress',
+  OnMsgDeleted = 'OnMsgDeleted',
+  OnDeleteUserAllMsgsInConv = 'OnDeleteUserAllMsgsInConv',
   OnRecvNewMessage = 'OnRecvNewMessage',
   OnRecvNewMessages = 'OnRecvNewMessages',
   OnMessageModified = 'OnMessageModified',

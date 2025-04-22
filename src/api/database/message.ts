@@ -31,8 +31,10 @@ import {
   markDeleteConversationAllMessages as databaseMarkDeleteConversationAllMessages,
   getUnreadMessage as databaseGetUnreadMessage,
   markConversationMessageAsReadBySeqs as databaseMarkConversationMessageAsReadBySeqs,
+  deleteMessagesByClientMsgIDs as databaseDeleteMessagesByClientMsgIDs,
   markConversationMessageAsRead as databaseMarkConversationMessageAsRead,
   getLatestActiveMessage as databaseGetLatestActiveMessage,
+  getMessageByUserID as databaseGetMessageByUserID,
 } from '@/sqls';
 import {
   converSqlExecResult,
@@ -887,6 +889,31 @@ export async function markConversationMessageAsReadBySeqs(
   }
 }
 
+export async function deleteMessagesByClientMsgIDs(
+  conversationID: string,
+  clientMsgIDListStr: string
+): Promise<string> {
+  try {
+    const db = await getInstance();
+
+    databaseDeleteMessagesByClientMsgIDs(
+      db,
+      conversationID,
+      JSON.parse(clientMsgIDListStr)
+    );
+
+    return formatResponse(db.getRowsModified());
+  } catch (e) {
+    console.error(e);
+
+    return formatResponse(
+      undefined,
+      DatabaseErrorCode.ErrorInit,
+      JSON.stringify(e)
+    );
+  }
+}
+
 export async function markConversationMessageAsRead(
   conversationID: string,
   clientMsgIDListStr: string,
@@ -1043,6 +1070,43 @@ export async function getLatestActiveMessage(
       conversationID,
       isReverse
     );
+
+    return formatResponse(
+      converSqlExecResult(
+        execResult[0],
+        'CamelCase',
+        ['isRead', 'isReact', 'isExternalExtensions'],
+        undefined,
+        ['dstUserIDs']
+      )
+    );
+  } catch (e) {
+    console.error(e);
+
+    return formatResponse(
+      undefined,
+      DatabaseErrorCode.ErrorInit,
+      JSON.stringify(e)
+    );
+  }
+}
+
+export async function getMessageByUserID(
+  conversationID: string,
+  userID: string
+): Promise<string> {
+  try {
+    const db = await getInstance();
+
+    const execResult = databaseGetMessageByUserID(db, conversationID, userID);
+
+    if (execResult.length === 0) {
+      return formatResponse(
+        '',
+        DatabaseErrorCode.ErrorNoRecord,
+        `no message with conversationID ${conversationID} and userID ${userID}`
+      );
+    }
 
     return formatResponse(
       converSqlExecResult(

@@ -159,6 +159,7 @@ import {
   getGroupMemberAllGroupIDs,
   getAlreadyExistSeqList,
   getLatestValidServerMessage,
+  getMessageByUserID,
   markConversationAllMessageAsRead,
   searchAllMessageByContentType,
   deleteConversationMsgs,
@@ -193,6 +194,7 @@ import {
   getNotificationAllSeqs,
   batchInsertNotificationSeq,
   getExistedTables,
+  deleteMessagesByClientMsgIDs,
 } from '../api/database';
 
 import { getInstance } from './database/instance';
@@ -251,6 +253,7 @@ rpc.registerMethod(
 );
 rpc.registerMethod('getAlreadyExistSeqList', getAlreadyExistSeqList);
 rpc.registerMethod('getLatestValidServerMessage', getLatestValidServerMessage);
+rpc.registerMethod('getMessageByUserID', getMessageByUserID);
 rpc.registerMethod('getMessageBySeq', getMessageBySeq);
 rpc.registerMethod('getMessagesByClientMsgIDs', getMessagesByClientMsgIDs);
 rpc.registerMethod('getMessagesBySeqs', getMessagesBySeqs);
@@ -271,6 +274,10 @@ rpc.registerMethod('getUnreadMessage', getUnreadMessage);
 rpc.registerMethod(
   'markConversationMessageAsReadBySeqs',
   markConversationMessageAsReadBySeqs
+);
+rpc.registerMethod(
+  'deleteMessagesByClientMsgIDs',
+  deleteMessagesByClientMsgIDs
 );
 rpc.registerMethod(
   'markConversationMessageAsRead',
