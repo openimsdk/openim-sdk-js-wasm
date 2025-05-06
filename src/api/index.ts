@@ -50,7 +50,7 @@ function initWorker() {
       '@openim/wasm-client-sdk/lib'
     ) as unknown as URL;
   }
-  worker = new Worker(workerUrl, {
+  worker = new Worker(window.WORKER_URL || workerUrl, {
     type: isSupportModuleWorker ? 'module' : 'classic',
   });
   // This is only required because Safari doesn't support nested
