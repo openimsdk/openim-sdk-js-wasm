@@ -56,6 +56,26 @@ export function deleteFriendRequestBothUserID(
   );
 }
 
+export function deleteSelfFriendRequests(
+  db: Database,
+  loginUserID: string,
+  fromUserIDs: string[],
+  toUserIDs: string[]
+): QueryExecResult[] {
+  return db.exec(
+    `
+      delete
+      from local_friend_requests
+      where (from_user_id = "${loginUserID}" and to_user_id in (${toUserIDs.join(
+      ','
+    )}))
+        or (to_user_id = "${loginUserID}" and from_user_id in (${fromUserIDs.join(
+      ','
+    )})) 
+      `
+  );
+}
+
 export function updateFriendRequest(
   db: Database,
   localFriendRequest: LocalFriendRequest

@@ -166,6 +166,7 @@ declare global {
     // friendRequest
     insertFriendRequest: DatabaseApi;
     deleteFriendRequestBothUserID: DatabaseApi;
+    deleteSelfFriendRequests: DatabaseApi;
     updateFriendRequest: DatabaseApi;
     getRecvFriendApplication: DatabaseApi;
     getSendFriendApplication: DatabaseApi;
@@ -206,6 +207,7 @@ declare global {
     // groupRequest
     insertGroupRequest: DatabaseApi;
     deleteGroupRequest: DatabaseApi;
+    deleteGroupRequestsFromUserID: DatabaseApi;
     updateGroupRequest: DatabaseApi;
     getSendGroupApplication: DatabaseApi;
     insertAdminGroupRequest: DatabaseApi;
@@ -614,6 +616,10 @@ declare global {
     getFriendApplicationListAsApplicant: (
       operationID: string
     ) => Promise<string>;
+    deleteFriendRequests: (
+      params: string,
+      operationID: string
+    ) => Promise<string>;
     getFriendList: (operationID: string) => Promise<string>;
     getFriendListPage: (operationID: string) => Promise<string>;
     updateFriends: (operationID: string, friends: string) => Promise<string>;
@@ -760,6 +766,10 @@ declare global {
       operationID: string
     ) => Promise<string>;
     getGroupApplicationListAsRecipient: (
+      operationID: string
+    ) => Promise<string>;
+    deleteGroupRequests: (
+      params: string,
       operationID: string
     ) => Promise<string>;
     acceptGroupApplication: (

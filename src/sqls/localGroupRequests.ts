@@ -66,6 +66,21 @@ export function deleteGroupRequest(
   );
 }
 
+export function deleteGroupRequestsFromUserID(
+  db: Database,
+  groupIDs: string[],
+  userID: string
+): QueryExecResult[] {
+  return db.exec(
+    `
+        delete
+        from local_group_requests
+        where group_id in (${groupIDs.join(',')})
+          and user_id = "${userID}"
+        `
+  );
+}
+
 export function updateGroupRequest(
   db: Database,
   localGroupRequest: LocalGroupRequest

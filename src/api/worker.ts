@@ -193,6 +193,8 @@ import {
   getNotificationAllSeqs,
   batchInsertNotificationSeq,
   getExistedTables,
+  deleteSelfFriendRequests,
+  deleteGroupRequestsFromUserID,
 } from '../api/database';
 
 import { getInstance } from './database/instance';
@@ -378,6 +380,7 @@ rpc.registerMethod(
   'deleteFriendRequestBothUserID',
   deleteFriendRequestBothUserID
 );
+rpc.registerMethod('deleteSelfFriendRequests', deleteSelfFriendRequests);
 rpc.registerMethod('updateFriendRequest', updateFriendRequest);
 rpc.registerMethod('getRecvFriendApplication', getRecvFriendApplication);
 rpc.registerMethod('getSendFriendApplication', getSendFriendApplication);
@@ -445,6 +448,10 @@ rpc.registerMethod('getGroupMemberListByUserIDs', getGroupMemberListByUserIDs);
 // groupRequest
 rpc.registerMethod('insertGroupRequest', insertGroupRequest);
 rpc.registerMethod('deleteGroupRequest', deleteGroupRequest);
+rpc.registerMethod(
+  'deleteGroupRequestsFromUserID',
+  deleteGroupRequestsFromUserID
+);
 rpc.registerMethod('updateGroupRequest', updateGroupRequest);
 rpc.registerMethod('getSendGroupApplication', getSendGroupApplication);
 rpc.registerMethod('insertAdminGroupRequest', insertAdminGroupRequest);

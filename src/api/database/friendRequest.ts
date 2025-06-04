@@ -2,6 +2,7 @@ import { DatabaseErrorCode } from '@/constant';
 import {
   insertFriendRequest as databaseInsertFriendRequest,
   deleteFriendRequestBothUserID as databasedeleteFriendRequestBothUserID,
+  deleteSelfFriendRequests as databaseDeleteSelfFriendRequests,
   updateFriendRequest as databaseupdateFriendRequest,
   getRecvFriendApplication as databaseGetRecvFriendApplication,
   getSendFriendApplication as databaseGetSendFriendApplication,
@@ -48,6 +49,33 @@ export async function deleteFriendRequestBothUserID(
     const db = await getInstance();
 
     databasedeleteFriendRequestBothUserID(db, fromUserID, toUserID);
+
+    return formatResponse('');
+  } catch (e) {
+    console.error(e);
+
+    return formatResponse(
+      undefined,
+      DatabaseErrorCode.ErrorInit,
+      JSON.stringify(e)
+    );
+  }
+}
+
+export async function deleteSelfFriendRequests(
+  loginUserID: string,
+  fromUserIDListStr: string,
+  toUserIDListStr: string
+): Promise<string> {
+  try {
+    const db = await getInstance();
+
+    databaseDeleteSelfFriendRequests(
+      db,
+      loginUserID,
+      JSON.parse(fromUserIDListStr),
+      JSON.parse(toUserIDListStr)
+    );
 
     return formatResponse('');
   } catch (e) {
