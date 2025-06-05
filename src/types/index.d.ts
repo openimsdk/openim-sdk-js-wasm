@@ -609,11 +609,20 @@ declare global {
       userIDList: string[]
     ) => Promise<string>;
     getFriendApplicationListAsRecipient: (
-      operationID: string
+      operationID: string,
+      handleResults: number[],
+      offset: number,
+      count: number
     ) => Promise<string>;
     getFriendApplicationListAsApplicant: (
-      operationID: string
+      operationID: string,
+      offset: number,
+      count: number
     ) => Promise<string>;
+    getFriendApplicationUnhandledCount: (
+      operationID: string,
+      time: number
+    ) => Promise<number>;
     getFriendList: (operationID: string) => Promise<string>;
     getFriendListPage: (operationID: string) => Promise<string>;
     updateFriends: (operationID: string, friends: string) => Promise<string>;
@@ -757,11 +766,23 @@ declare global {
       groupID: string
     ) => Promise<string>;
     getGroupApplicationListAsApplicant: (
-      operationID: string
+      operationID: string,
+      groupID: string[],
+      handleResults: number[],
+      offset: number,
+      count: number
     ) => Promise<string>;
     getGroupApplicationListAsRecipient: (
-      operationID: string
+      operationID: string,
+      groupID: string[],
+      handleResults: number[],
+      offset: number,
+      count: number
     ) => Promise<string>;
+    getGroupApplicationUnhandledCount: (
+      operationID: string,
+      time: number
+    ) => Promise<number>;
     acceptGroupApplication: (
       operationID: string,
       groupID: string,

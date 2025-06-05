@@ -419,3 +419,29 @@ export type SetConversationMsgDestructTimeParams = {
   conversationID: string;
   msgDestructTime: number;
 };
+
+export type GetGroupApplicationListParams = {
+  groupID: string[];
+  handleResults: number[];
+  offset: number;
+  count: number;
+};
+
+export type GetFriendApplicationListAsRecipientParams = {
+  handleResults: number[];
+  offset: number;
+  count: number;
+};
+
+export type GetFriendApplicationListAsApplicationParams = {
+  offset: number;
+  count: number;
+};
+
+export type GetFriendApplicationUnhandledCountParams = {
+  time: number;
+};
+
+export type GetSelfUnhandledApplyCountParams = {
+  time: number;
+};

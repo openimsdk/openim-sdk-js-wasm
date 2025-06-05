@@ -75,6 +75,10 @@ import {
   ChangeInputStatesParams,
   GetInputstatesParams,
   FetchSurroundingParams,
+  GetFriendApplicationListAsRecipientParams,
+  GetFriendApplicationListAsApplicationParams,
+  GetSelfUnhandledApplyCountParams,
+  GetGroupApplicationListParams,
 } from '../types/params';
 
 import {
@@ -1122,18 +1126,41 @@ class SDK extends Emitter {
       [operationID, JSON.stringify(data.friendUserIDList), data.filterBlack]
     );
   };
-  getFriendApplicationListAsRecipient = (operationID = uuidv4()) => {
+  getFriendApplicationListAsRecipient = (
+    data: GetFriendApplicationListAsRecipientParams = {
+      handleResults: [],
+      offset: 0,
+      count: 0,
+    },
+    operationID = uuidv4()
+  ) => {
     return this._invoker<FriendApplicationItem[]>(
       'getFriendApplicationListAsRecipient ',
       window.getFriendApplicationListAsRecipient,
-      [operationID]
+      [operationID, JSON.stringify(data)]
     );
   };
-  getFriendApplicationListAsApplicant = (operationID = uuidv4()) => {
+  getFriendApplicationListAsApplicant = (
+    data: GetFriendApplicationListAsApplicationParams = {
+      offset: 0,
+      count: 0,
+    },
+    operationID = uuidv4()
+  ) => {
     return this._invoker<FriendApplicationItem[]>(
       'getFriendApplicationListAsApplicant ',
       window.getFriendApplicationListAsApplicant,
-      [operationID]
+      [operationID, JSON.stringify(data)]
+    );
+  };
+  getFriendApplicationUnhandledCount = (
+    data: GetSelfUnhandledApplyCountParams,
+    operationID = uuidv4()
+  ) => {
+    return this._invoker<number>(
+      'getFriendApplicationUnhandledCount ',
+      window.getFriendApplicationUnhandledCount,
+      [operationID, JSON.stringify(data)]
     );
   };
   getFriendList = (filterBlack = false, operationID = uuidv4()) => {
@@ -1467,18 +1494,44 @@ class SDK extends Emitter {
       data.newOwnerUserID,
     ]);
   };
-  getGroupApplicationListAsApplicant = (operationID = uuidv4()) => {
+  getGroupApplicationListAsApplicant = (
+    data: GetGroupApplicationListParams = {
+      groupID: [],
+      handleResults: [],
+      offset: 0,
+      count: 0,
+    },
+    operationID = uuidv4()
+  ) => {
     return this._invoker<GroupApplicationItem[]>(
       'getGroupApplicationListAsApplicant ',
       window.getGroupApplicationListAsApplicant,
-      [operationID]
+      [operationID, JSON.stringify(data)]
     );
   };
-  getGroupApplicationListAsRecipient = (operationID = uuidv4()) => {
+  getGroupApplicationListAsRecipient = (
+    data: GetGroupApplicationListParams = {
+      groupID: [],
+      handleResults: [],
+      offset: 0,
+      count: 0,
+    },
+    operationID = uuidv4()
+  ) => {
     return this._invoker<GroupApplicationItem[]>(
       'getGroupApplicationListAsRecipient ',
       window.getGroupApplicationListAsRecipient,
-      [operationID]
+      [operationID, JSON.stringify(data)]
+    );
+  };
+  getGroupApplicationUnhandledCount = (
+    data: GetSelfUnhandledApplyCountParams,
+    operationID = uuidv4()
+  ) => {
+    return this._invoker<number>(
+      'getGroupApplicationUnhandledCount ',
+      window.getGroupApplicationUnhandledCount,
+      [operationID, JSON.stringify(data)]
     );
   };
   acceptGroupApplication = <T>(
