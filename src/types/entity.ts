@@ -16,6 +16,7 @@ import {
   ApplicationHandleResult,
   Relationship,
   OnlineState,
+  AddFriendPermission,
 } from './enum';
 export type WSEvent<T = unknown> = {
   event: CbEvents;
@@ -112,6 +113,7 @@ export type SelfUserInfo = {
   nickname: string;
   userID: string;
   globalRecvMsgOpt: MessageReceiveOptType;
+  addFriendPermission: AddFriendPermission;
 };
 export type PartialUserInfo = {
   userID: string;
