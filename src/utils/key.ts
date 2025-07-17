@@ -66,6 +66,7 @@ const InternalConstraint = [
   ['entity_id', 'entityID'],
   ['version_id', 'versionID'],
   ['display_is_read', 'displayIsRead'],
+  ['add_friend_permission', 'addFriendPermission'],
 ];
 
 function _getInternalCamelCaseBySnakeCase(key: string) {
