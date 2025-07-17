@@ -15,6 +15,7 @@ export function localUsers(db: Database): QueryExecResult[] {
             'ex' varchar(1024),
             'attached_info' varchar(1024),
             'global_recv_msg_opt' integer,
+            'add_friend_permission' integer,
              primary key ('user_id')
         )
     `
