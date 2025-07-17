@@ -434,3 +434,28 @@ export type ModifyMessageParams = {
   message: MessageItem;
   conversationID: string;
 };
+export type GetGroupApplicationListParams = {
+  groupID: string[];
+  handleResults: number[];
+  offset: number;
+  count: number;
+};
+
+export type GetFriendApplicationListAsRecipientParams = {
+  handleResults: number[];
+  offset: number;
+  count: number;
+};
+
+export type GetFriendApplicationListAsApplicationParams = {
+  offset: number;
+  count: number;
+};
+
+export type GetFriendApplicationUnhandledCountParams = {
+  time: number;
+};
+
+export type GetSelfUnhandledApplyCountParams = {
+  time: number;
+};

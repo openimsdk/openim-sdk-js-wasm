@@ -3,6 +3,11 @@ export enum MessageReceiveOptType {
   NotReceive = 1,
   NotNotify = 2,
 }
+export enum AddFriendPermission {
+  AddFriendAllowed = 0,
+  AddFriendAllowedNoReview = 1,
+  AddFriendDenied = 2,
+}
 export enum AllowType {
   Allowed = 0,
   NotAllowed = 1,

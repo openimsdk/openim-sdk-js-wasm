@@ -88,7 +88,7 @@ export function getMessageList(
     //   !isReverse ? 'DESC' : 'ASC'
     // } LIMIT ${count}
     // `
-    ` 
+    `
     SELECT * FROM 'chat_logs_${conversationID}'
     WHERE
       send_time ${!isReverse ? '<' : '>'} ${startTime}

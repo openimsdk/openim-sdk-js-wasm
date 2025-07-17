@@ -6,6 +6,7 @@ export async function alterTable(db: Database) {
   alter380(db);
   alter381(db);
   await alter384(db);
+  alter383p8(db);
 }
 
 function alter351(db: Database) {
@@ -63,5 +64,17 @@ async function alter384(db: Database) {
     });
   } catch (error) {
     // get conversation id list error
+  }
+}
+
+function alter383p8(db: Database) {
+  try {
+    db.exec(
+      `
+        ALTER TABLE local_users ADD COLUMN add_friend_permission numeric;
+        `
+    );
+  } catch (error) {
+    // alter table error
   }
 }
