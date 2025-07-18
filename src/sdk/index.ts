@@ -1166,6 +1166,21 @@ class SDK extends Emitter {
       [operationID, JSON.stringify(data)]
     );
   };
+  deleteFriendRequests = (
+    params: Array<{ fromUserID: string; toUserID: string }>,
+    operationID = uuidv4()
+  ) => {
+    return this._invoker<void>(
+      'deleteFriendRequests ',
+      window.deleteFriendRequests,
+      [
+        operationID,
+        JSON.stringify({
+          friendRequests: params,
+        }),
+      ]
+    );
+  };
   getFriendList = (filterBlack = false, operationID = uuidv4()) => {
     return this._invoker<FriendUserItem[]>(
       'getFriendList ',
@@ -1535,6 +1550,21 @@ class SDK extends Emitter {
       'getGroupApplicationUnhandledCount ',
       window.getGroupApplicationUnhandledCount,
       [operationID, JSON.stringify(data)]
+    );
+  };
+  deleteGroupRequests = (
+    params: Array<{ fromUserID: string; groupID: string }>,
+    operationID = uuidv4()
+  ) => {
+    return this._invoker<void>(
+      'deleteGroupRequests ',
+      window.deleteGroupRequests,
+      [
+        operationID,
+        JSON.stringify({
+          groupRequests: params,
+        }),
+      ]
     );
   };
   acceptGroupApplication = <T>(

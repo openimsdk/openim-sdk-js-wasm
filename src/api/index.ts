@@ -503,6 +503,9 @@ export function initDatabaseAPI(isLogStandardOutput = true): void {
   window.deleteFriendRequestBothUserID = registeMethodOnWindow(
     'deleteFriendRequestBothUserID'
   );
+  window.deleteSelfFriendRequests = registeMethodOnWindow(
+    'deleteSelfFriendRequests'
+  );
   window.updateFriendRequest = registeMethodOnWindow('updateFriendRequest');
   window.getRecvFriendApplication = registeMethodOnWindow(
     'getRecvFriendApplication'
@@ -562,6 +565,9 @@ export function initDatabaseAPI(isLogStandardOutput = true): void {
   // groupRequest
   window.insertGroupRequest = registeMethodOnWindow('insertGroupRequest');
   window.deleteGroupRequest = registeMethodOnWindow('deleteGroupRequest');
+  window.deleteGroupRequestsFromUserID = registeMethodOnWindow(
+    'deleteGroupRequestsFromUserID'
+  );
   window.updateGroupRequest = registeMethodOnWindow('updateGroupRequest');
   window.getSendGroupApplication = registeMethodOnWindow(
     'getSendGroupApplication'

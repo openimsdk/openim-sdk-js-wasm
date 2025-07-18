@@ -2,6 +2,7 @@ import { DatabaseErrorCode } from '@/constant';
 import {
   insertGroupRequest as databaseInsertGroupRequest,
   deleteGroupRequest as databaseDeleteGroupRequest,
+  deleteGroupRequestsFromUserID as databaseDeleteGroupRequestsFromUserID,
   updateGroupRequest as databaseUpdateGroupRequest,
   getSendGroupApplication as databaseGetSendGroupApplication,
   insertAdminGroupRequest as databaseInsertAdminGroupRequest,
@@ -55,6 +56,31 @@ export async function deleteGroupRequest(
     const db = await getInstance();
 
     databaseDeleteGroupRequest(db, groupID, userID);
+
+    return formatResponse('');
+  } catch (e) {
+    console.error(e);
+
+    return formatResponse(
+      undefined,
+      DatabaseErrorCode.ErrorInit,
+      JSON.stringify(e)
+    );
+  }
+}
+
+export async function deleteGroupRequestsFromUserID(
+  groupIDListStr: string,
+  userID: string
+): Promise<string> {
+  try {
+    const db = await getInstance();
+
+    databaseDeleteGroupRequestsFromUserID(
+      db,
+      JSON.parse(groupIDListStr),
+      userID
+    );
 
     return formatResponse('');
   } catch (e) {
