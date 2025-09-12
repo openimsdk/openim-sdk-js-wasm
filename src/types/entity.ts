@@ -495,3 +495,14 @@ export type CallingRoomData = {
   invitation?: RtcInvite;
   roomID: string;
 };
+
+export type PinnedMessageDetail = {
+  pinnedTime: number;
+  userID: string;
+  msg: MessageItem;
+};
+
+export type PinnedMessageChangeData = {
+  conversationID: string;
+  msgs: PinnedMessageDetail[];
+};

@@ -459,3 +459,14 @@ export type GetFriendApplicationUnhandledCountParams = {
 export type GetSelfUnhandledApplyCountParams = {
   time: number;
 };
+
+export type SetConversationPinnedMsgParams = {
+  conversationID: string;
+  clientMsgID: string;
+  pinned: boolean;
+};
+
+export type DeleteUserMsgInConvParams = {
+  conversationID: string;
+  userID: string;
+};

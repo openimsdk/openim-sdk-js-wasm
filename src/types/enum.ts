@@ -94,6 +94,8 @@ export enum MessageType {
   GroupNameUpdated = 1520,
   BurnMessageChange = 1701,
   RevokeMessage = 2101,
+
+  MsgPinned = 2400,
 }
 export enum SessionType {
   Single = 1,

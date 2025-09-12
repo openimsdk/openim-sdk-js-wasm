@@ -660,6 +660,7 @@ export async function searchMessageByKeyword(
 export async function searchMessageByContentType(
   conversationID: string,
   contentTypeStr: string,
+  senderUserIDListStr: string,
   startTime: number,
   endTime: number,
   offset: number,
@@ -672,6 +673,7 @@ export async function searchMessageByContentType(
       db,
       conversationID,
       JSON.parse(contentTypeStr),
+      JSON.parse(senderUserIDListStr),
       startTime,
       endTime,
       offset,
@@ -701,6 +703,7 @@ export async function searchMessageByContentType(
 export async function searchMessageByContentTypeAndKeyword(
   conversationID: string,
   contentTypeStr: string,
+  senderUserIDListStr: string,
   keywordListStr: string,
   keywordListMatchType: number,
   startTime: number,
@@ -713,6 +716,7 @@ export async function searchMessageByContentTypeAndKeyword(
       db,
       conversationID,
       JSON.parse(contentTypeStr),
+      JSON.parse(senderUserIDListStr),
       JSON.parse(keywordListStr),
       keywordListMatchType,
       startTime,

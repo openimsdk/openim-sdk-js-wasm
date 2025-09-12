@@ -10,6 +10,7 @@ import {
   GroupMemberItem,
   GroupMessageReceiptInfo,
   MessageItem,
+  PinnedMessageChangeData,
   ReceiptInfo,
   RevokedInfo,
   SelfUserInfo,
@@ -46,6 +47,7 @@ export type EventDataMap = {
     conversationID: string;
     userID: string;
   };
+  [CbEvents.OnChangedPinnedMsg]: PinnedMessageChangeData;
   [CbEvents.OnRecvNewMessage]: MessageItem;
   [CbEvents.OnRecvNewMessages]: MessageItem[];
   [CbEvents.OnMessageModified]: MessageItem;

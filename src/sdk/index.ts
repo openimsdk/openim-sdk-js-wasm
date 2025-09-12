@@ -82,6 +82,8 @@ import {
   GetFriendApplicationListAsApplicationParams,
   GetSelfUnhandledApplyCountParams,
   GetGroupApplicationListParams,
+  SetConversationPinnedMsgParams,
+  DeleteUserMsgInConvParams,
 } from '../types/params';
 
 import {
@@ -1847,16 +1849,32 @@ class SDK extends Emitter {
   };
 
   deleteUserAllMessagesInConv = <T>(
-    data: {
-      conversationID: string;
-      userID: string;
-    },
+    data: DeleteUserMsgInConvParams,
     operationID = uuidv4()
   ) => {
     return this._invoker<T>(
       'deleteUserAllMessagesInConv ',
       window.deleteUserAllMessagesInConv,
       [operationID, data.conversationID, data.userID]
+    );
+  };
+
+  setConversationPinnedMsg = <T>(
+    data: SetConversationPinnedMsgParams,
+    operationID = uuidv4()
+  ) => {
+    return this._invoker<T>(
+      'setConversationPinnedMsg ',
+      window.setConversationPinnedMsg,
+      [operationID, data.conversationID, data.clientMsgID, data.pinned]
+    );
+  };
+
+  getConversationPinnedMsg = (data: string, operationID = uuidv4()) => {
+    return this._invoker<MessageItem[]>(
+      'getConversationPinnedMsg ',
+      window.getConversationPinnedMsg,
+      [operationID, data]
     );
   };
 
