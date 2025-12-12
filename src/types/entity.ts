@@ -329,7 +329,7 @@ export type AttachedInfoElem = {
   uploadProgress?: UploadProgress;
 };
 export type MarkdownTextElem = {
-  text: string;
+  content: string;
 };
 export type StreamElem = {
   content: string;

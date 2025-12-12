@@ -45,6 +45,7 @@ export enum Platform {
   Linux = 7,
   AndroidPad = 8,
   iPad = 9,
+  Harmony = 11,
 }
 export enum LogLevel {
   Verbose = 6,
