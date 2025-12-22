@@ -189,6 +189,15 @@ import {
   setVersionSync,
   deleteVersionSync,
 
+  // events
+  insertEvent,
+  upsertEventByDedupe,
+  claimNextEvent,
+  completeEvent,
+  failEvent,
+  recoverExpiredLeases,
+  purgeCompletedEvents,
+
   // notification
   setNotificationSeq,
   getNotificationAllSeqs,
@@ -355,6 +364,15 @@ rpc.registerMethod('setAppSDKVersion', setAppSDKVersion);
 rpc.registerMethod('getVersionSync', getVersionSync);
 rpc.registerMethod('setVersionSync', setVersionSync);
 rpc.registerMethod('deleteVersionSync', deleteVersionSync);
+
+// events
+rpc.registerMethod('insertEvent', insertEvent);
+rpc.registerMethod('upsertEventByDedupe', upsertEventByDedupe);
+rpc.registerMethod('claimNextEvent', claimNextEvent);
+rpc.registerMethod('completeEvent', completeEvent);
+rpc.registerMethod('failEvent', failEvent);
+rpc.registerMethod('recoverExpiredLeases', recoverExpiredLeases);
+rpc.registerMethod('purgeCompletedEvents', purgeCompletedEvents);
 
 rpc.registerMethod('getJoinedSuperGroupList', getJoinedSuperGroupList);
 rpc.registerMethod('getJoinedSuperGroupIDList', getJoinedSuperGroupIDList);

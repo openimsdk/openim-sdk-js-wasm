@@ -129,6 +129,14 @@ declare global {
     getVersionSync: DatabaseApi;
     setVersionSync: DatabaseApi;
     deleteVersionSync: DatabaseApi;
+    // events
+    insertEvent: DatabaseApi;
+    upsertEventByDedupe: DatabaseApi;
+    claimNextEvent: DatabaseApi;
+    completeEvent: DatabaseApi;
+    failEvent: DatabaseApi;
+    recoverExpiredLeases: DatabaseApi;
+    purgeCompletedEvents: DatabaseApi;
     // unread messages
     deleteConversationUnreadMessageList: DatabaseApi;
     batchInsertConversationUnreadMessageList: DatabaseApi;

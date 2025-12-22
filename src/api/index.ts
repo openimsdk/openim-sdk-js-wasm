@@ -378,6 +378,15 @@ export function initDatabaseAPI(isLogStandardOutput = true): void {
   window.setVersionSync = registeMethodOnWindow('setVersionSync');
   window.deleteVersionSync = registeMethodOnWindow('deleteVersionSync');
 
+  // events
+  window.insertEvent = registeMethodOnWindow('insertEvent');
+  window.upsertEventByDedupe = registeMethodOnWindow('upsertEventByDedupe');
+  window.claimNextEvent = registeMethodOnWindow('claimNextEvent');
+  window.completeEvent = registeMethodOnWindow('completeEvent');
+  window.failEvent = registeMethodOnWindow('failEvent');
+  window.recoverExpiredLeases = registeMethodOnWindow('recoverExpiredLeases');
+  window.purgeCompletedEvents = registeMethodOnWindow('purgeCompletedEvents');
+
   // super groups
   window.getJoinedSuperGroupList = registeMethodOnWindow(
     'getJoinedSuperGroupList'

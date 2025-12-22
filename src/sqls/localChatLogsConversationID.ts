@@ -125,6 +125,8 @@ export function getMessagesByClientMsgIDs(
   conversationID: string,
   clientMsgIDs: string[]
 ): QueryExecResult[] {
+  _initLocalChatLogsTable(db, conversationID);
+
   return db.exec(
     `
     SELECT * FROM 'chat_logs_${conversationID}' WHERE client_msg_id in (${clientMsgIDs
