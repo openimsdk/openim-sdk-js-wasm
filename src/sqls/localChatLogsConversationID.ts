@@ -36,7 +36,6 @@ export function localChatLogsConversationID(
         'is_react' tinyint(1),
         'is_external_extensions' tinyint(1),
         'msg_first_modify_time' int,
-        'dst_user_ids' text,
         PRIMARY KEY ('client_msg_id')
       );
       `
@@ -257,13 +256,13 @@ export function batchInsertMessageList(
 ): QueryExecResult[] {
   _initLocalChatLogsTable(db, conversationID);
 
-  messageList.map(message => {
-    if (message.dst_user_ids === null || message.dst_user_ids === undefined) {
-      message.dst_user_ids = '';
-    } else {
-      message.dst_user_ids = JSON.stringify(message.dst_user_ids);
-    }
-  });
+  // messageList.map(message => {
+  //   if (message.dst_user_ids === null || message.dst_user_ids === undefined) {
+  //     message.dst_user_ids = '';
+  //   } else {
+  //     message.dst_user_ids = JSON.stringify(message.dst_user_ids);
+  //   }
+  // });
 
   const sql = squel
     .insert()
@@ -278,14 +277,14 @@ export function insertMessage(
   conversationID: string,
   localChatLogs: ClientMessage
 ): QueryExecResult[] {
-  if (
-    localChatLogs.dst_user_ids === null ||
-    localChatLogs.dst_user_ids === undefined
-  ) {
-    localChatLogs.dst_user_ids = '';
-  } else {
-    localChatLogs.dst_user_ids = JSON.stringify(localChatLogs.dst_user_ids);
-  }
+  // if (
+  //   localChatLogs.dst_user_ids === null ||
+  //   localChatLogs.dst_user_ids === undefined
+  // ) {
+  //   localChatLogs.dst_user_ids = '';
+  // } else {
+  //   localChatLogs.dst_user_ids = JSON.stringify(localChatLogs.dst_user_ids);
+  // }
 
   const sql = squel
     .insert()
@@ -313,6 +312,7 @@ export function searchMessageByKeyword(
   db: Database,
   conversationID: string,
   contentType: number[],
+  senderUserIDList: string[],
   keywordList: string[],
   keywordListMatchType: number,
   startTime: number,
@@ -333,6 +333,12 @@ export function searchMessageByKeyword(
     } else {
       subCondition +=
         'content like ' + "'%" + keywordList[index] + "%' " + connectStr;
+    }
+
+    if (senderUserIDList.length) {
+      subCondition += `AND send_id IN (${senderUserIDList
+        .map(id => `'${id}'`)
+        .join(',')})`;
     }
   });
   return db.exec(

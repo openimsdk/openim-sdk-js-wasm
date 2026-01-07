@@ -1878,6 +1878,18 @@ class SDK extends Emitter {
     );
   };
 
+  createMarkdownMessage = (text: string, operationID = uuidv4()) => {
+    return this._invoker<MessageItem>(
+      'createMarkdownMessage',
+      window.createMarkdownMessage,
+      [operationID, text],
+      data => {
+        // compitable with old version sdk
+        return data[0];
+      }
+    );
+  };
+
   fileMapSet = (uuid: string, file: File) => window.fileMapSet(uuid, file);
 }
 

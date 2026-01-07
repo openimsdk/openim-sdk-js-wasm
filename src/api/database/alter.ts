@@ -1,11 +1,11 @@
 import { Database } from '@jlongster/sql.js';
 import { getAllConversationIDList } from './conversation';
 
-export async function alterTable(db: Database) {
+export function alterTable(db: Database) {
   alter351(db);
   alter380(db);
   alter381(db);
-  await alter384(db);
+  // await alter384(db);
   alter383p8(db);
 }
 

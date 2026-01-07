@@ -1,6 +1,6 @@
 {
   "name": "@openim/wasm-client-sdk",
-  "version": "3.8.4-next.1",
+  "version": "3.8.4-next.3",
   "description": "open im sdk for web",
   "source": "src/index.ts",
   "main": "lib/index.js",
@@ -27,7 +27,8 @@
     "semantic-release": "semantic-release",
     "test:watch": "jest --watch",
     "test": "jest --coverage",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm run build"
   },
   "repository": {
     "type": "git",

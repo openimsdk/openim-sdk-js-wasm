@@ -885,6 +885,7 @@ declare global {
     modifyMessage: (...args) => Promise<string>;
     setConversationPinnedMsg: (...args) => Promise<string>;
     getConversationPinnedMsg: (...args) => Promise<string>;
+    createMarkdownMessage: (...args) => Promise<string>;
 
     // debug
     exec: (sql: string) => Promise<any>;
