@@ -659,6 +659,49 @@ export function initDatabaseAPI(isLogStandardOutput = true): void {
   );
 
   window.getExistedTables = registeMethodOnWindow('getExistedTables');
+
+  // conversation groups
+  window.insertConversationGroup = registeMethodOnWindow(
+    'insertConversationGroup'
+  );
+  window.batchInsertConversationGroups = registeMethodOnWindow(
+    'batchInsertConversationGroups'
+  );
+  window.upsertConversationGroups = registeMethodOnWindow(
+    'upsertConversationGroups'
+  );
+  window.updateConversationGroup = registeMethodOnWindow(
+    'updateConversationGroup'
+  );
+  window.deleteConversationGroup = registeMethodOnWindow(
+    'deleteConversationGroup'
+  );
+  window.getConversationGroup = registeMethodOnWindow('getConversationGroup');
+  window.getConversationGroups = registeMethodOnWindow('getConversationGroups');
+  window.getAllConversationGroups = registeMethodOnWindow(
+    'getAllConversationGroups'
+  );
+  window.updateConversationGroupSerial = registeMethodOnWindow(
+    'updateConversationGroupSerial'
+  );
+  window.replaceConversationGroupMembers = registeMethodOnWindow(
+    'replaceConversationGroupMembers'
+  );
+  window.addConversationGroupMembers = registeMethodOnWindow(
+    'addConversationGroupMembers'
+  );
+  window.removeConversationGroupMembers = registeMethodOnWindow(
+    'removeConversationGroupMembers'
+  );
+  window.getConversationGroupIDsByConversationID = registeMethodOnWindow(
+    'getConversationGroupIDsByConversationID'
+  );
+  window.getConversationIDsByGroupID = registeMethodOnWindow(
+    'getConversationIDsByGroupID'
+  );
+  window.deleteConversationGroupMembersByGroupID = registeMethodOnWindow(
+    'deleteConversationGroupMembersByGroupID'
+  );
 }
 
 export const workerPromise = rpc?.connect(5000);

@@ -260,6 +260,23 @@ declare global {
     // table master
     getExistedTables: DatabaseApi;
 
+    // conversation groups
+    insertConversationGroup: DatabaseApi;
+    batchInsertConversationGroups: DatabaseApi;
+    upsertConversationGroups: DatabaseApi;
+    updateConversationGroup: DatabaseApi;
+    deleteConversationGroup: DatabaseApi;
+    getConversationGroup: DatabaseApi;
+    getConversationGroups: DatabaseApi;
+    getAllConversationGroups: DatabaseApi;
+    updateConversationGroupSerial: DatabaseApi;
+    replaceConversationGroupMembers: DatabaseApi;
+    addConversationGroupMembers: DatabaseApi;
+    removeConversationGroupMembers: DatabaseApi;
+    getConversationGroupIDsByConversationID: DatabaseApi;
+    getConversationIDsByGroupID: DatabaseApi;
+    deleteConversationGroupMembersByGroupID: DatabaseApi;
+
     // registered by go wasm
     initSDK: (operationID: string, config: string) => void;
     login: (operationID: string, userID: string, token: string) => Promise<any>;

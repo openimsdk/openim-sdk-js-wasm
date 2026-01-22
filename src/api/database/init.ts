@@ -19,6 +19,8 @@ import {
   localAppSDKVersions,
   localVersionSyncs,
   localEvents,
+  localConversationGroups,
+  localConversationGroupMembers,
 } from '@/sqls';
 import { formatResponse } from '@/utils';
 import { QueryExecResult } from '@jlongster/sql.js';
@@ -64,7 +66,10 @@ export async function init(userId: string, dir: string): Promise<string> {
     const execResultLocalAppSDKVersions = localAppSDKVersions(db);
     const execResultLocalVersionSync = localVersionSyncs(db);
     const execResultLocalEvents = localEvents(db);
-    await alterTable(db);
+    const execResultLocalConversationGroups = localConversationGroups(db);
+    const execResultLocalConversationGroupMembers =
+      localConversationGroupMembers(db);
+    alterTable(db);
     results.push(
       ...[
         execResultLocalUploads,
@@ -86,6 +91,8 @@ export async function init(userId: string, dir: string): Promise<string> {
         execResultLocalAppSDKVersions,
         execResultLocalVersionSync,
         execResultLocalEvents,
+        execResultLocalConversationGroups,
+        execResultLocalConversationGroupMembers,
       ]
     );
 

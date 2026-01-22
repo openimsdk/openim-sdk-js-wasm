@@ -206,6 +206,23 @@ import {
   deleteMessagesByClientMsgIDs,
   deleteSelfFriendRequests,
   deleteGroupRequestsFromUserID,
+
+  // conversation groups
+  insertConversationGroup,
+  batchInsertConversationGroups,
+  upsertConversationGroups,
+  updateConversationGroup,
+  deleteConversationGroup,
+  getConversationGroup,
+  getConversationGroups,
+  getAllConversationGroups,
+  updateConversationGroupSerial,
+  replaceConversationGroupMembers,
+  addConversationGroupMembers,
+  removeConversationGroupMembers,
+  getConversationGroupIDsByConversationID,
+  getConversationIDsByGroupID,
+  deleteConversationGroupMembersByGroupID,
 } from '../api/database';
 
 import { getInstance } from './database/instance';
@@ -548,3 +565,38 @@ rpc.registerMethod('exportDB', async () => {
     console.info('sql export error, return ', error);
   }
 });
+
+// conversation groups
+rpc.registerMethod('insertConversationGroup', insertConversationGroup);
+rpc.registerMethod(
+  'batchInsertConversationGroups',
+  batchInsertConversationGroups
+);
+rpc.registerMethod('upsertConversationGroups', upsertConversationGroups);
+rpc.registerMethod('updateConversationGroup', updateConversationGroup);
+rpc.registerMethod('deleteConversationGroup', deleteConversationGroup);
+rpc.registerMethod('getConversationGroup', getConversationGroup);
+rpc.registerMethod('getConversationGroups', getConversationGroups);
+rpc.registerMethod('getAllConversationGroups', getAllConversationGroups);
+rpc.registerMethod(
+  'updateConversationGroupSerial',
+  updateConversationGroupSerial
+);
+rpc.registerMethod(
+  'replaceConversationGroupMembers',
+  replaceConversationGroupMembers
+);
+rpc.registerMethod('addConversationGroupMembers', addConversationGroupMembers);
+rpc.registerMethod(
+  'removeConversationGroupMembers',
+  removeConversationGroupMembers
+);
+rpc.registerMethod(
+  'getConversationGroupIDsByConversationID',
+  getConversationGroupIDsByConversationID
+);
+rpc.registerMethod('getConversationIDsByGroupID', getConversationIDsByGroupID);
+rpc.registerMethod(
+  'deleteConversationGroupMembersByGroupID',
+  deleteConversationGroupMembersByGroupID
+);

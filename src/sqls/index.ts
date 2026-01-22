@@ -19,3 +19,4 @@ export * from './localAppSdkVersion';
 export * from './localVersionSync';
 export * from './localTableMaster';
 export * from './localEvents';
+export * from './localConversationGroups';

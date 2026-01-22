@@ -19,3 +19,4 @@ export * from './versionSync';
 export * from './notification';
 export * from './tableMaster';
 export * from './events';
+export * from './conversationGroups';
