@@ -84,6 +84,14 @@ import {
   GetGroupApplicationListParams,
   SetConversationPinnedMsgParams,
   DeleteUserMsgInConvParams,
+  CreateConversationGroupReq,
+  UpdateConversationGroupReq,
+  GetConversationGroupInfoWithConversationsReq,
+  SetConversationGroupOrderReq,
+  AddConversationsToGroupParams,
+  RemoveConversationsFromGroupParams,
+  SetMessageLocalContentParams,
+  SpeechToTextParams,
 } from '../types/params';
 
 import {
@@ -110,8 +118,12 @@ import {
   UserOnlineState,
   WSEvent,
   WsResponse,
+  ConversationGroup,
+  GetConversationGroupInfoWithConversationsResp,
+  SpeechToTextCapabilities,
 } from '../types/entity';
 import {
+  ConversationGroupType,
   GroupAtType,
   LoginStatus,
   MessageReceiveOptType,
@@ -1887,6 +1899,137 @@ class SDK extends Emitter {
         // compitable with old version sdk
         return data[0];
       }
+    );
+  };
+
+  createConversationGroup = (
+    data: CreateConversationGroupReq,
+    operationID = uuidv4()
+  ) => {
+    return this._invoker<ConversationGroup>(
+      'createConversationGroup',
+      window.createConversationGroup,
+      [operationID, JSON.stringify(data)]
+    );
+  };
+
+  updateConversationGroup = (
+    data: UpdateConversationGroupReq,
+    operationID = uuidv4()
+  ) => {
+    return this._invoker<ConversationGroup>(
+      'updateConversationGroup',
+      window.updateConversationGroup,
+      [operationID, JSON.stringify(data)]
+    );
+  };
+
+  deleteConversationGroup = <T>(groupID: string, operationID = uuidv4()) => {
+    return this._invoker<T>(
+      'deleteConversationGroup',
+      window.deleteConversationGroup,
+      [operationID, groupID]
+    );
+  };
+
+  getConversationGroups = (
+    conversationGroupType: ConversationGroupType,
+    operationID = uuidv4()
+  ) => {
+    return this._invoker<ConversationGroup[]>(
+      'getConversationGroups',
+      window.getConversationGroups,
+      [operationID, conversationGroupType]
+    );
+  };
+
+  setConversationGroupOrder = <T>(
+    data: SetConversationGroupOrderReq[],
+    operationID = uuidv4()
+  ) => {
+    return this._invoker<T>(
+      'setConversationGroupOrder',
+      window.setConversationGroupOrder,
+      [operationID, JSON.stringify(data)]
+    );
+  };
+
+  addConversationsToGroups = <T>(
+    data: AddConversationsToGroupParams,
+    operationID = uuidv4()
+  ) => {
+    return this._invoker<T>(
+      'addConversationsToGroups',
+      window.addConversationsToGroups,
+      [
+        operationID,
+        JSON.stringify(data.conversationIDs),
+        JSON.stringify(data.conversationGroupIDs),
+      ]
+    );
+  };
+
+  removeConversationsFromGroups = <T>(
+    data: RemoveConversationsFromGroupParams,
+    operationID = uuidv4()
+  ) => {
+    return this._invoker<T>(
+      'removeConversationsFromGroups',
+      window.removeConversationsFromGroups,
+      [
+        operationID,
+        JSON.stringify(data.conversationIDs),
+        JSON.stringify(data.conversationGroupIDs),
+      ]
+    );
+  };
+
+  getConversationGroupIDsByConversationID = (
+    conversationID: string,
+    operationID = uuidv4()
+  ) => {
+    return this._invoker<string[]>(
+      'getConversationGroupIDsByConversationID',
+      window.getConversationGroupIDsByConversationID,
+      [operationID, conversationID]
+    );
+  };
+
+  getConversationGroupInfoWithConversations = (
+    data: GetConversationGroupInfoWithConversationsReq,
+    operationID = uuidv4()
+  ) => {
+    return this._invoker<GetConversationGroupInfoWithConversationsResp>(
+      'getConversationGroupInfoWithConversations',
+      window.getConversationGroupInfoWithConversations,
+      [operationID, JSON.stringify(data)]
+    );
+  };
+
+  speechToText = (data: SpeechToTextParams, operationID = uuidv4()) => {
+    return this._invoker<{ text: string }>(
+      'speechToText',
+      window.speechToText,
+      [operationID, JSON.stringify(data)]
+    );
+  };
+
+  speechToTextCapabilities = (operationID = uuidv4()) => {
+    return this._invoker<SpeechToTextCapabilities>(
+      'speechToTextCapabilities',
+      window.speechToTextCapabilities,
+      [operationID]
+    );
+  };
+
+  setMessageLocalContent = (
+    data: SetMessageLocalContentParams,
+    operationID = uuidv4()
+  ) => {
+    return this._invoker<void>(
+      'setMessageLocalContent',
+      window.setMessageLocalContent,
+      [operationID, data.conversationID, JSON.stringify(data.message)]
     );
   };
 

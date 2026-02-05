@@ -1,6 +1,8 @@
 import { CbEvents } from '@/constant';
 import {
   BlackUserItem,
+  ConversationGroup,
+  ConversationGroupMemberChangedCallbackData,
   ConversationInputStatus,
   ConversationItem,
   FriendApplicationItem,
@@ -70,6 +72,11 @@ export type EventDataMap = {
   [CbEvents.OnUserTokenExpired]: void;
   [CbEvents.OnUserTokenInvalid]: void;
   [CbEvents.UploadComplete]: UploadProgressData;
+  [CbEvents.OnConversationGroupAdded]: ConversationGroup[];
+  [CbEvents.OnConversationGroupDeleted]: ConversationGroup[];
+  [CbEvents.OnConversationGroupChanged]: ConversationGroup[];
+  [CbEvents.OnConversationGroupMemberAdded]: ConversationGroupMemberChangedCallbackData;
+  [CbEvents.OnConversationGroupMemberDeleted]: ConversationGroupMemberChangedCallbackData;
 };
 
 export type DataOfEvent<E extends CbEvents> = E extends keyof EventDataMap

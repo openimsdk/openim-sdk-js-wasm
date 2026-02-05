@@ -5,11 +5,11 @@ import {
   upsertConversationGroups as databaseUpsertConversationGroups,
   updateConversationGroup as databaseUpdateConversationGroup,
   deleteConversationGroup as databaseDeleteConversationGroup,
+  deleteAllConversationGroups as databaseDeleteAllConversationGroups,
   getConversationGroup as databaseGetConversationGroup,
   getConversationGroups as databaseGetConversationGroups,
   getAllConversationGroups as databaseGetAllConversationGroups,
   updateConversationGroupSerial as databaseUpdateConversationGroupSerial,
-  replaceConversationGroupMembers as databaseReplaceConversationGroupMembers,
   addConversationGroupMembers as databaseAddConversationGroupMembers,
   removeConversationGroupMembers as databaseRemoveConversationGroupMembers,
   getConversationGroupIDsByConversationID as databaseGetConversationGroupIDsByConversationID,
@@ -27,15 +27,13 @@ import { getInstance } from './instance';
 // ==================== local_conversation_groups API ====================
 
 export async function insertConversationGroup(
-  localConversationGroupStr: string,
-  loginUserID: string
+  localConversationGroupStr: string
 ): Promise<string> {
   try {
     const db = await getInstance();
     const localConversationGroup = convertToSnakeCaseObject(
       JSON.parse(localConversationGroupStr)
     ) as LocalConversationGroup;
-    localConversationGroup.owner_user_id = loginUserID;
 
     databaseInsertConversationGroup(db, localConversationGroup);
 
@@ -52,19 +50,14 @@ export async function insertConversationGroup(
 }
 
 export async function batchInsertConversationGroups(
-  localConversationGroupsStr: string,
-  loginUserID: string
+  localConversationGroupsStr: string
 ): Promise<string> {
   try {
     const db = await getInstance();
     const localConversationGroups = (
       JSON.parse(localConversationGroupsStr) as Record<string, unknown>[]
     ).map(group => {
-      const converted = convertToSnakeCaseObject(
-        group
-      ) as LocalConversationGroup;
-      converted.owner_user_id = loginUserID;
-      return converted;
+      return convertToSnakeCaseObject(group) as LocalConversationGroup;
     });
 
     databaseBatchInsertConversationGroups(db, localConversationGroups);
@@ -82,19 +75,14 @@ export async function batchInsertConversationGroups(
 }
 
 export async function upsertConversationGroups(
-  localConversationGroupsStr: string,
-  loginUserID: string
+  localConversationGroupsStr: string
 ): Promise<string> {
   try {
     const db = await getInstance();
     const localConversationGroups = (
       JSON.parse(localConversationGroupsStr) as Record<string, unknown>[]
     ).map(group => {
-      const converted = convertToSnakeCaseObject(
-        group
-      ) as LocalConversationGroup;
-      converted.owner_user_id = loginUserID;
-      return converted;
+      return convertToSnakeCaseObject(group) as LocalConversationGroup;
     });
 
     databaseUpsertConversationGroups(db, localConversationGroups);
@@ -112,17 +100,15 @@ export async function upsertConversationGroups(
 }
 
 export async function updateConversationGroup(
-  localConversationGroupStr: string,
-  loginUserID: string
+  localConversationGroupStr: string
 ): Promise<string> {
   try {
     const db = await getInstance();
     const localConversationGroup = convertToSnakeCaseObject(
       JSON.parse(localConversationGroupStr)
     ) as LocalConversationGroup;
-    localConversationGroup.owner_user_id = loginUserID;
 
-    const result = databaseUpdateConversationGroup(db, localConversationGroup);
+    databaseUpdateConversationGroup(db, localConversationGroup);
     if (db.getRowsModified() === 0) {
       return formatResponse(
         undefined,
@@ -144,13 +130,12 @@ export async function updateConversationGroup(
 }
 
 export async function deleteConversationGroup(
-  groupID: string,
-  loginUserID: string
+  groupID: string
 ): Promise<string> {
   try {
     const db = await getInstance();
 
-    databaseDeleteConversationGroup(db, groupID, loginUserID);
+    databaseDeleteConversationGroup(db, groupID);
 
     return formatResponse('');
   } catch (e) {
@@ -164,15 +149,30 @@ export async function deleteConversationGroup(
   }
 }
 
-export async function getConversationGroup(
-  groupID: string,
-  loginUserID: string
-): Promise<string> {
+export async function deleteAllConversationGroups(): Promise<string> {
   try {
     const db = await getInstance();
 
-    const execResult = databaseGetConversationGroup(db, groupID, loginUserID);
-    const result = converSqlExecResult(execResult[0], 'CamelCase');
+    databaseDeleteAllConversationGroups(db);
+
+    return formatResponse('');
+  } catch (e) {
+    console.error(e);
+
+    return formatResponse(
+      undefined,
+      DatabaseErrorCode.ErrorInit,
+      JSON.stringify(e)
+    );
+  }
+}
+
+export async function getConversationGroup(groupID: string): Promise<string> {
+  try {
+    const db = await getInstance();
+
+    const execResult = databaseGetConversationGroup(db, groupID);
+    const result = converSqlExecResult(execResult[0], 'CamelCase', ['hidden']);
 
     if (result.length === 0) {
       return formatResponse(
@@ -195,16 +195,17 @@ export async function getConversationGroup(
 }
 
 export async function getConversationGroups(
-  groupIDsStr: string,
-  loginUserID: string
+  groupIDsStr: string
 ): Promise<string> {
   try {
     const db = await getInstance();
     const groupIDs = JSON.parse(groupIDsStr) as string[];
 
-    const execResult = databaseGetConversationGroups(db, groupIDs, loginUserID);
+    const execResult = databaseGetConversationGroups(db, groupIDs);
 
-    return formatResponse(converSqlExecResult(execResult[0], 'CamelCase'));
+    return formatResponse(
+      converSqlExecResult(execResult[0], 'CamelCase', ['hidden'])
+    );
   } catch (e) {
     console.error(e);
 
@@ -216,15 +217,15 @@ export async function getConversationGroups(
   }
 }
 
-export async function getAllConversationGroups(
-  loginUserID: string
-): Promise<string> {
+export async function getAllConversationGroups(): Promise<string> {
   try {
     const db = await getInstance();
 
-    const execResult = databaseGetAllConversationGroups(db, loginUserID);
+    const execResult = databaseGetAllConversationGroups(db);
 
-    return formatResponse(converSqlExecResult(execResult[0], 'CamelCase'));
+    return formatResponse(
+      converSqlExecResult(execResult[0], 'CamelCase', ['hidden'])
+    );
   } catch (e) {
     console.error(e);
 
@@ -238,13 +239,12 @@ export async function getAllConversationGroups(
 
 export async function updateConversationGroupSerial(
   groupID: string,
-  serial: number,
-  loginUserID: string
+  serial: number
 ): Promise<string> {
   try {
     const db = await getInstance();
 
-    databaseUpdateConversationGroupSerial(db, groupID, serial, loginUserID);
+    databaseUpdateConversationGroupSerial(db, groupID, serial);
     if (db.getRowsModified() === 0) {
       return formatResponse(
         undefined,
@@ -267,49 +267,15 @@ export async function updateConversationGroupSerial(
 
 // ==================== local_conversation_group_members API ====================
 
-export async function replaceConversationGroupMembers(
-  conversationID: string,
-  groupIDsStr: string,
-  loginUserID: string
-): Promise<string> {
-  try {
-    const db = await getInstance();
-    const groupIDs = JSON.parse(groupIDsStr) as string[];
-
-    databaseReplaceConversationGroupMembers(
-      db,
-      conversationID,
-      groupIDs,
-      loginUserID
-    );
-
-    return formatResponse('');
-  } catch (e) {
-    console.error(e);
-
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
-  }
-}
-
 export async function addConversationGroupMembers(
   conversationID: string,
-  groupIDsStr: string,
-  loginUserID: string
+  groupIDsStr: string
 ): Promise<string> {
   try {
     const db = await getInstance();
     const groupIDs = JSON.parse(groupIDsStr) as string[];
 
-    databaseAddConversationGroupMembers(
-      db,
-      conversationID,
-      groupIDs,
-      loginUserID
-    );
+    databaseAddConversationGroupMembers(db, conversationID, groupIDs);
 
     return formatResponse('');
   } catch (e) {
@@ -325,19 +291,13 @@ export async function addConversationGroupMembers(
 
 export async function removeConversationGroupMembers(
   conversationID: string,
-  groupIDsStr: string,
-  loginUserID: string
+  groupIDsStr: string
 ): Promise<string> {
   try {
     const db = await getInstance();
     const groupIDs = JSON.parse(groupIDsStr) as string[];
 
-    databaseRemoveConversationGroupMembers(
-      db,
-      conversationID,
-      groupIDs,
-      loginUserID
-    );
+    databaseRemoveConversationGroupMembers(db, conversationID, groupIDs);
 
     return formatResponse('');
   } catch (e) {
@@ -352,21 +312,19 @@ export async function removeConversationGroupMembers(
 }
 
 export async function getConversationGroupIDsByConversationID(
-  conversationID: string,
-  loginUserID: string
+  conversationID: string
 ): Promise<string> {
   try {
     const db = await getInstance();
 
     const execResult = databaseGetConversationGroupIDsByConversationID(
       db,
-      conversationID,
-      loginUserID
+      conversationID
     );
     const result = converSqlExecResult(execResult[0], 'CamelCase') as {
-      groupId: string;
+      conversationGroupID: string;
     }[];
-    const groupIDs = result.map(item => item.groupId);
+    const groupIDs = result.map(item => item.conversationGroupID);
 
     return formatResponse(groupIDs);
   } catch (e) {
@@ -381,21 +339,16 @@ export async function getConversationGroupIDsByConversationID(
 }
 
 export async function getConversationIDsByGroupID(
-  groupID: string,
-  loginUserID: string
+  groupID: string
 ): Promise<string> {
   try {
     const db = await getInstance();
 
-    const execResult = databaseGetConversationIDsByGroupID(
-      db,
-      groupID,
-      loginUserID
-    );
+    const execResult = databaseGetConversationIDsByGroupID(db, groupID);
     const result = converSqlExecResult(execResult[0], 'CamelCase') as {
-      conversationId: string;
+      conversationID: string;
     }[];
-    const conversationIDs = result.map(item => item.conversationId);
+    const conversationIDs = result.map(item => item.conversationID);
 
     return formatResponse(conversationIDs);
   } catch (e) {
@@ -410,13 +363,12 @@ export async function getConversationIDsByGroupID(
 }
 
 export async function deleteConversationGroupMembersByGroupID(
-  groupID: string,
-  loginUserID: string
+  groupID: string
 ): Promise<string> {
   try {
     const db = await getInstance();
 
-    databaseDeleteConversationGroupMembersByGroupID(db, groupID, loginUserID);
+    databaseDeleteConversationGroupMembersByGroupID(db, groupID);
 
     return formatResponse('');
   } catch (e) {

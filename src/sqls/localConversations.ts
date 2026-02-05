@@ -32,6 +32,8 @@ export function localConversations(db: Database): QueryExecResult[] {
             'has_read_seq' integer,
             'msg_destruct_time' integer default 604800,
             'is_msg_destruct' numeric default false,
+            'remark' varchar(1024),
+            'is_marked' numeric,
             primary key ('conversation_id')
         )
     `
@@ -401,6 +403,22 @@ export function searchConversations(
     SELECT * FROM local_conversations
     WHERE show_name LIKE '%${keyword}%'
     ORDER BY latest_msg_send_time DESC
+    `
+  );
+}
+
+export function getConversationUnreadCountMap(
+  db: Database,
+  conversationIDs: string[]
+): QueryExecResult[] {
+  const ids = conversationIDs.map(v => `'${v}'`);
+  return db.exec(
+    `
+    SELECT conversation_id, unread_count
+    FROM local_conversations
+    WHERE conversation_id IN (${ids.join(',')})
+      AND recv_msg_opt < 2
+      AND latest_msg_send_time > 0
     `
   );
 }

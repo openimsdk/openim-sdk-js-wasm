@@ -2,7 +2,6 @@ import squel from 'squel';
 import { Database, QueryExecResult } from '@jlongster/sql.js';
 
 export type LocalConversationGroup = { [key: string]: unknown };
-export type LocalConversationGroupMember = { [key: string]: unknown };
 
 // ==================== local_conversation_groups 表 ====================
 
@@ -10,13 +9,14 @@ export function localConversationGroups(db: Database): QueryExecResult[] {
   return db.exec(
     `
     CREATE TABLE IF NOT EXISTS 'local_conversation_groups' (
-      'group_id' varchar(64),
-      'owner_user_id' varchar(64),
+      'conversation_group_id' varchar(64),
       'name' varchar(255),
       'serial' INTEGER,
       'version' INTEGER,
       'ex' varchar(1024),
-      PRIMARY KEY ('group_id', 'owner_user_id')
+      'conversation_group_type' INTEGER,
+      'hidden' INTEGER,
+      PRIMARY KEY ('conversation_group_id')
     )
     `
   );
@@ -43,12 +43,13 @@ export function batchInsertConversationGroups(
     return [];
   }
 
-  let sql = squel.insert().into('local_conversation_groups');
-  localConversationGroups.forEach(group => {
-    sql = sql.setFieldsRows([group]);
-  });
+  const sql = squel
+    .insert()
+    .into('local_conversation_groups')
+    .setFieldsRows(localConversationGroups)
+    .toString();
 
-  return db.exec(sql.toString());
+  return db.exec(sql);
 }
 
 export function upsertConversationGroups(
@@ -62,16 +63,21 @@ export function upsertConversationGroups(
   const results: QueryExecResult[] = [];
   localConversationGroups.forEach(group => {
     const sql = `
-      INSERT INTO local_conversation_groups (group_id, owner_user_id, name, serial, version, ex)
-      VALUES ('${group.group_id}', '${group.owner_user_id}', '${group.name}', ${
+      INSERT INTO local_conversation_groups (conversation_group_id, name, serial, version, ex, conversation_group_type, hidden)
+      VALUES ('${group.conversation_group_id}', '${group.name}', ${
       group.serial
-    }, ${group.version}, '${group.ex || ''}')
-      ON CONFLICT (group_id, owner_user_id) DO UPDATE SET
+    }, ${group.version}, '${group.ex || ''}', ${
+      group.conversation_group_type ?? 0
+    }, ${group.hidden ?? 0})
+      ON CONFLICT (conversation_group_id) DO UPDATE SET
         name = excluded.name,
         serial = excluded.serial,
         version = excluded.version,
-        ex = excluded.ex
+        ex = excluded.ex,
+        conversation_group_type = excluded.conversation_group_type,
+        hidden = excluded.hidden
     `;
+
     results.push(...db.exec(sql));
   });
 
@@ -87,7 +93,7 @@ export function updateConversationGroup(
     .table('local_conversation_groups')
     .setFields(localConversationGroup)
     .where(
-      `owner_user_id = '${localConversationGroup.owner_user_id}' AND group_id = '${localConversationGroup.group_id}'`
+      `conversation_group_id = '${localConversationGroup.conversation_group_id}'`
     )
     .toString();
 
@@ -96,29 +102,33 @@ export function updateConversationGroup(
 
 export function deleteConversationGroup(
   db: Database,
-  groupID: string,
-  ownerUserID: string
+  groupID: string
 ): QueryExecResult[] {
   return db.exec(
     `
     DELETE FROM local_conversation_groups
-    WHERE owner_user_id = "${ownerUserID}"
-      AND group_id = "${groupID}"
+    WHERE conversation_group_id = "${groupID}"
+    `
+  );
+}
+
+export function deleteAllConversationGroups(db: Database): QueryExecResult[] {
+  return db.exec(
+    `
+    DELETE FROM local_conversation_groups
     `
   );
 }
 
 export function getConversationGroup(
   db: Database,
-  groupID: string,
-  ownerUserID: string
+  groupID: string
 ): QueryExecResult[] {
   return db.exec(
     `
     SELECT *
     FROM local_conversation_groups
-    WHERE owner_user_id = "${ownerUserID}"
-      AND group_id = "${groupID}"
+    WHERE conversation_group_id = "${groupID}"
     LIMIT 1
     `
   );
@@ -126,29 +136,23 @@ export function getConversationGroup(
 
 export function getConversationGroups(
   db: Database,
-  groupIDs: string[],
-  ownerUserID: string
+  groupIDs: string[]
 ): QueryExecResult[] {
   const ids = groupIDs.map(v => `'${v}'`);
   return db.exec(
     `
     SELECT *
     FROM local_conversation_groups
-    WHERE owner_user_id = "${ownerUserID}"
-      AND group_id IN (${ids.join(',')})
+    WHERE conversation_group_id IN (${ids.join(',')})
     `
   );
 }
 
-export function getAllConversationGroups(
-  db: Database,
-  ownerUserID: string
-): QueryExecResult[] {
+export function getAllConversationGroups(db: Database): QueryExecResult[] {
   return db.exec(
     `
     SELECT *
     FROM local_conversation_groups
-    WHERE owner_user_id = "${ownerUserID}"
     `
   );
 }
@@ -156,15 +160,13 @@ export function getAllConversationGroups(
 export function updateConversationGroupSerial(
   db: Database,
   groupID: string,
-  serial: number,
-  ownerUserID: string
+  serial: number
 ): QueryExecResult[] {
   return db.exec(
     `
     UPDATE local_conversation_groups
     SET serial = ${serial}
-    WHERE owner_user_id = "${ownerUserID}"
-      AND group_id = "${groupID}"
+    WHERE conversation_group_id = "${groupID}"
     `
   );
 }
@@ -176,43 +178,9 @@ export function localConversationGroupMembers(db: Database): QueryExecResult[] {
     `
     CREATE TABLE IF NOT EXISTS 'local_conversation_group_members' (
       'conversation_id' char(128),
-      'group_id' varchar(64),
-      'owner_user_id' varchar(64),
-      PRIMARY KEY ('conversation_id', 'group_id', 'owner_user_id')
+      'conversation_group_id' varchar(64),
+      PRIMARY KEY ('conversation_id', 'conversation_group_id')
     )
-    `
-  );
-}
-
-export function replaceConversationGroupMembers(
-  db: Database,
-  conversationID: string,
-  groupIDs: string[],
-  ownerUserID: string
-): QueryExecResult[] {
-  // 先删除该会话的所有关联
-  db.exec(
-    `
-    DELETE FROM local_conversation_group_members
-    WHERE owner_user_id = "${ownerUserID}"
-      AND conversation_id = "${conversationID}"
-    `
-  );
-
-  // 如果没有新的关联则直接返回
-  if (groupIDs.length === 0) {
-    return [];
-  }
-
-  // 批量插入新的关联
-  const values = groupIDs
-    .map(groupID => `("${conversationID}", "${groupID}", "${ownerUserID}")`)
-    .join(', ');
-
-  return db.exec(
-    `
-    INSERT INTO local_conversation_group_members (conversation_id, group_id, owner_user_id)
-    VALUES ${values}
     `
   );
 }
@@ -220,20 +188,19 @@ export function replaceConversationGroupMembers(
 export function addConversationGroupMembers(
   db: Database,
   conversationID: string,
-  groupIDs: string[],
-  ownerUserID: string
+  groupIDs: string[]
 ): QueryExecResult[] {
   if (groupIDs.length === 0) {
     return [];
   }
 
   const values = groupIDs
-    .map(groupID => `("${conversationID}", "${groupID}", "${ownerUserID}")`)
+    .map(groupID => `("${conversationID}", "${groupID}")`)
     .join(', ');
 
   return db.exec(
     `
-    INSERT INTO local_conversation_group_members (conversation_id, group_id, owner_user_id)
+    INSERT INTO local_conversation_group_members (conversation_id, conversation_group_id)
     VALUES ${values}
     ON CONFLICT DO NOTHING
     `
@@ -243,60 +210,52 @@ export function addConversationGroupMembers(
 export function removeConversationGroupMembers(
   db: Database,
   conversationID: string,
-  groupIDs: string[],
-  ownerUserID: string
+  groupIDs: string[]
 ): QueryExecResult[] {
   const ids = groupIDs.map(v => `'${v}'`);
   return db.exec(
     `
     DELETE FROM local_conversation_group_members
-    WHERE owner_user_id = "${ownerUserID}"
-      AND conversation_id = "${conversationID}"
-      AND group_id IN (${ids.join(',')})
+    WHERE conversation_id = "${conversationID}"
+      AND conversation_group_id IN (${ids.join(',')})
     `
   );
 }
 
 export function getConversationGroupIDsByConversationID(
   db: Database,
-  conversationID: string,
-  ownerUserID: string
+  conversationID: string
 ): QueryExecResult[] {
   return db.exec(
     `
-    SELECT group_id
+    SELECT conversation_group_id
     FROM local_conversation_group_members
-    WHERE owner_user_id = "${ownerUserID}"
-      AND conversation_id = "${conversationID}"
+    WHERE conversation_id = "${conversationID}"
     `
   );
 }
 
 export function getConversationIDsByGroupID(
   db: Database,
-  groupID: string,
-  ownerUserID: string
+  groupID: string
 ): QueryExecResult[] {
   return db.exec(
     `
     SELECT conversation_id
     FROM local_conversation_group_members
-    WHERE owner_user_id = "${ownerUserID}"
-      AND group_id = "${groupID}"
+    WHERE conversation_group_id = "${groupID}"
     `
   );
 }
 
 export function deleteConversationGroupMembersByGroupID(
   db: Database,
-  groupID: string,
-  ownerUserID: string
+  groupID: string
 ): QueryExecResult[] {
   return db.exec(
     `
     DELETE FROM local_conversation_group_members
-    WHERE owner_user_id = "${ownerUserID}"
-      AND group_id = "${groupID}"
+    WHERE conversation_group_id = "${groupID}"
     `
   );
 }

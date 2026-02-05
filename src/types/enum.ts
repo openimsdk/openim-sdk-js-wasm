@@ -146,3 +146,8 @@ export enum ViewType {
   History = 0,
   Search = 1,
 }
+export enum ConversationGroupType {
+  ConversationGroupTypeNormal,
+  ConversationGroupTypeFilter,
+  ConversationGroupTypeAll,
+}

@@ -78,6 +78,7 @@ declare global {
     getAllSendingMessages: DatabaseApi;
     getLatestActiveMessage: DatabaseApi;
     // conversation
+    getConversationUnreadCountMap: DatabaseApi;
     getAllConversationListDB: DatabaseApi;
     getAllConversationListToSync: DatabaseApi;
     getHiddenConversationList: DatabaseApi;
@@ -261,21 +262,22 @@ declare global {
     getExistedTables: DatabaseApi;
 
     // conversation groups
-    insertConversationGroup: DatabaseApi;
-    batchInsertConversationGroups: DatabaseApi;
-    upsertConversationGroups: DatabaseApi;
-    updateConversationGroup: DatabaseApi;
-    deleteConversationGroup: DatabaseApi;
-    getConversationGroup: DatabaseApi;
-    getConversationGroups: DatabaseApi;
-    getAllConversationGroups: DatabaseApi;
-    updateConversationGroupSerial: DatabaseApi;
-    replaceConversationGroupMembers: DatabaseApi;
-    addConversationGroupMembers: DatabaseApi;
-    removeConversationGroupMembers: DatabaseApi;
-    getConversationGroupIDsByConversationID: DatabaseApi;
-    getConversationIDsByGroupID: DatabaseApi;
-    deleteConversationGroupMembersByGroupID: DatabaseApi;
+    insertConversationGroupDB: DatabaseApi;
+    batchInsertConversationGroupsDB: DatabaseApi;
+    upsertConversationGroupsDB: DatabaseApi;
+    updateConversationGroupDB: DatabaseApi;
+    deleteConversationGroupDB: DatabaseApi;
+    deleteAllConversationGroupDB: DatabaseApi;
+    getConversationGroupDB: DatabaseApi;
+    getConversationGroupsDB: DatabaseApi;
+    getAllConversationGroupsDB: DatabaseApi;
+    updateConversationGroupSerialDB: DatabaseApi;
+
+    addConversationGroupMembersDB: DatabaseApi;
+    removeConversationGroupMembersDB: DatabaseApi;
+    getConversationGroupIDsByConversationIdDB: DatabaseApi;
+    getConversationIDsByGroupIdDB: DatabaseApi;
+    deleteConversationGroupMembersByGroupIdDB: DatabaseApi;
 
     // registered by go wasm
     initSDK: (operationID: string, config: string) => void;
@@ -903,6 +905,18 @@ declare global {
     setConversationPinnedMsg: (...args) => Promise<string>;
     getConversationPinnedMsg: (...args) => Promise<string>;
     createMarkdownMessage: (...args) => Promise<string>;
+    createConversationGroup: (...args) => Promise<string>;
+    updateConversationGroup: (...args) => Promise<string>;
+    deleteConversationGroup: (...args) => Promise<string>;
+    getConversationGroups: (...args) => Promise<string>;
+    setConversationGroupOrder: (...args) => Promise<string>;
+    addConversationsToGroups: (...args) => Promise<string>;
+    removeConversationsFromGroups: (...args) => Promise<string>;
+    getConversationGroupIDsByConversationID: (...args) => Promise<string>;
+    getConversationGroupInfoWithConversations: (...args) => Promise<string>;
+    speechToText: (...args) => Promise<string>;
+    speechToTextCapabilities: (...args) => Promise<string>;
+    setMessageLocalContent: (...args) => Promise<string>;
 
     // debug
     exec: (sql: string) => Promise<any>;

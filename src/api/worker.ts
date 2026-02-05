@@ -213,16 +213,17 @@ import {
   upsertConversationGroups,
   updateConversationGroup,
   deleteConversationGroup,
+  deleteAllConversationGroups,
   getConversationGroup,
   getConversationGroups,
   getAllConversationGroups,
   updateConversationGroupSerial,
-  replaceConversationGroupMembers,
   addConversationGroupMembers,
   removeConversationGroupMembers,
   getConversationGroupIDsByConversationID,
   getConversationIDsByGroupID,
   deleteConversationGroupMembersByGroupID,
+  getConversationUnreadCountMap,
 } from '../api/database';
 
 import { getInstance } from './database/instance';
@@ -368,6 +369,10 @@ rpc.registerMethod(
 rpc.registerMethod('getAllConversationIDList', getAllConversationIDList);
 rpc.registerMethod('getAllConversations', getAllConversations);
 rpc.registerMethod('searchConversations', searchConversations);
+rpc.registerMethod(
+  'getConversationUnreadCountMap',
+  getConversationUnreadCountMap
+);
 
 rpc.registerMethod('getLoginUser', getLoginUser);
 rpc.registerMethod('insertLoginUser', insertLoginUser);
@@ -575,16 +580,13 @@ rpc.registerMethod(
 rpc.registerMethod('upsertConversationGroups', upsertConversationGroups);
 rpc.registerMethod('updateConversationGroup', updateConversationGroup);
 rpc.registerMethod('deleteConversationGroup', deleteConversationGroup);
+rpc.registerMethod('deleteAllConversationGroups', deleteAllConversationGroups);
 rpc.registerMethod('getConversationGroup', getConversationGroup);
 rpc.registerMethod('getConversationGroups', getConversationGroups);
 rpc.registerMethod('getAllConversationGroups', getAllConversationGroups);
 rpc.registerMethod(
   'updateConversationGroupSerial',
   updateConversationGroupSerial
-);
-rpc.registerMethod(
-  'replaceConversationGroupMembers',
-  replaceConversationGroupMembers
 );
 rpc.registerMethod('addConversationGroupMembers', addConversationGroupMembers);
 rpc.registerMethod(

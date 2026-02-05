@@ -30,6 +30,7 @@ import {
   getAllConversations as databaseGetAllConversations,
   searchConversations as databaseSearchConversations,
   deleteAllConversation as databaseDeleteAllConversation,
+  getConversationUnreadCountMap as databaseGetConversationUnreadCountMap,
 } from '@/sqls';
 import {
   converSqlExecResult,
@@ -50,6 +51,7 @@ export async function getAllConversationList(): Promise<string> {
         'isPrivateChat',
         'isNotInGroup',
         'isMsgDestruct',
+        'isMarked',
       ])
     );
   } catch (e) {
@@ -75,6 +77,7 @@ export async function getAllConversationListToSync(): Promise<string> {
         'isPrivateChat',
         'isNotInGroup',
         'isMsgDestruct',
+        'isMarked',
       ])
     );
   } catch (e) {
@@ -166,6 +169,7 @@ export async function getHiddenConversationList(): Promise<string> {
         'isPrivateChat',
         'isNotInGroup',
         'isMsgDestruct',
+        'isMarked',
       ])
     );
   } catch (e) {
@@ -199,6 +203,7 @@ export async function getConversation(conversationID: string): Promise<string> {
         'isPrivateChat',
         'isNotInGroup',
         'isMsgDestruct',
+        'isMarked',
       ])[0]
     );
   } catch (e) {
@@ -227,6 +232,7 @@ export async function getMultipleConversation(
         'isPrivateChat',
         'isNotInGroup',
         'isMsgDestruct',
+        'isMarked',
       ])
     );
   } catch (e) {
@@ -375,6 +381,7 @@ export async function getConversationByUserID(userID: string): Promise<string> {
         'isPrivateChat',
         'isNotInGroup',
         'isMsgDestruct',
+        'isMarked',
       ])[0]
     );
   } catch (e) {
@@ -403,6 +410,7 @@ export async function getConversationListSplit(
         'isPrivateChat',
         'isNotInGroup',
         'isMsgDestruct',
+        'isMarked',
       ])
     );
   } catch (e) {
@@ -749,6 +757,7 @@ export async function getAllConversations(): Promise<string> {
         'isPrivateChat',
         'isNotInGroup',
         'isMsgDestruct',
+        'isMarked',
       ])
     );
   } catch (e) {
@@ -774,8 +783,36 @@ export async function searchConversations(keyword: string): Promise<string> {
         'isPrivateChat',
         'isNotInGroup',
         'isMsgDestruct',
+        'isMarked',
       ])
     );
+  } catch (e) {
+    console.error(e);
+
+    return formatResponse(
+      undefined,
+      DatabaseErrorCode.ErrorInit,
+      JSON.stringify(e)
+    );
+  }
+}
+
+export async function getConversationUnreadCountMap(
+  conversationIDListStr: string
+): Promise<string> {
+  try {
+    const db = await getInstance();
+
+    const execResult = databaseGetConversationUnreadCountMap(
+      db,
+      JSON.parse(conversationIDListStr)
+    );
+    const resultMap: Record<string, number> = {};
+    converSqlExecResult(execResult[0], 'CamelCase').forEach(item => {
+      resultMap[item.conversationID as string] = item.unreadCount as number;
+    });
+
+    return formatResponse(resultMap);
   } catch (e) {
     console.error(e);
 

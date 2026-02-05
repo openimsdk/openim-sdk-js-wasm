@@ -78,6 +78,13 @@ export enum CbEvents {
   OnRoomParticipantDisconnected = 'OnRoomParticipantDisconnected',
   OnReceiveCustomSignal = 'OnReceiveCustomSignal',
 
+  // conversation group
+  OnConversationGroupAdded = 'OnConversationGroupAdded',
+  OnConversationGroupDeleted = 'OnConversationGroupDeleted',
+  OnConversationGroupChanged = 'OnConversationGroupChanged',
+  OnConversationGroupMemberAdded = 'OnConversationGroupMemberAdded',
+  OnConversationGroupMemberDeleted = 'OnConversationGroupMemberDeleted',
+
   // unuse
   UnUsedEvent = 'UnUsedEvent',
 }

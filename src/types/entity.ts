@@ -17,6 +17,7 @@ import {
   Relationship,
   OnlineState,
   AddFriendPermission,
+  ConversationGroupType,
 } from './enum';
 export type WSEvent<T = unknown> = {
   event: CbEvents;
@@ -201,8 +202,10 @@ export type ConversationItem = {
   isNotInGroup: boolean;
   isPrivateChat: boolean;
   isMsgDestruct: boolean;
+  isMarked: boolean;
   attachedInfo: string;
   ex?: string;
+  remark?: string;
 };
 export type MessageItem = {
   clientMsgID: string;
@@ -366,6 +369,12 @@ export type SoundElem = {
   sourceUrl: string;
   dataSize: number;
   duration: number;
+  soundType: string;
+  text?: SoundTextElem;
+};
+export type SoundTextElem = {
+  text: string;
+  translate: Record<string, string>;
 };
 export type VideoElem = {
   videoPath: string;
@@ -511,4 +520,36 @@ export type UploadProgressData = {
   fileSize: number;
   streamSize: number;
   uuid: string;
+};
+
+export type ConversationGroup = {
+  conversationGroupID: string;
+  name: string;
+  serial: number;
+  version: number;
+  ex?: string;
+  conversationGroupType: ConversationGroupType;
+  hidden: boolean;
+  unreadCount: number;
+  conversationIDs: string[];
+};
+
+export type GetConversationGroupInfoWithConversationsResp = {
+  group: ConversationGroup;
+  conversationTotal: number;
+  conversationElems: ConversationItem[];
+};
+
+export type SpeechToTextCapabilities = {
+  format: string[];
+  sampleRateHz: number;
+  maxRecordTimeMs: number;
+  maxFileSize: number;
+  provider: string;
+};
+
+export type ConversationGroupMemberChangedCallbackData = {
+  group: ConversationGroup;
+  conversationIDs: string[];
+  conversations: ConversationItem[];
 };

@@ -361,6 +361,9 @@ export function initDatabaseAPI(isLogStandardOutput = true): void {
   window.getLatestActiveMessage = registeMethodOnWindow(
     'getLatestActiveMessage'
   );
+  window.getConversationUnreadCountMap = registeMethodOnWindow(
+    'getConversationUnreadCountMap'
+  );
 
   // users
   window.getLoginUser = registeMethodOnWindow('getLoginUser');
@@ -661,45 +664,47 @@ export function initDatabaseAPI(isLogStandardOutput = true): void {
   window.getExistedTables = registeMethodOnWindow('getExistedTables');
 
   // conversation groups
-  window.insertConversationGroup = registeMethodOnWindow(
+  window.insertConversationGroupDB = registeMethodOnWindow(
     'insertConversationGroup'
   );
-  window.batchInsertConversationGroups = registeMethodOnWindow(
+  window.batchInsertConversationGroupsDB = registeMethodOnWindow(
     'batchInsertConversationGroups'
   );
-  window.upsertConversationGroups = registeMethodOnWindow(
+  window.upsertConversationGroupsDB = registeMethodOnWindow(
     'upsertConversationGroups'
   );
-  window.updateConversationGroup = registeMethodOnWindow(
+  window.updateConversationGroupDB = registeMethodOnWindow(
     'updateConversationGroup'
   );
-  window.deleteConversationGroup = registeMethodOnWindow(
+  window.deleteConversationGroupDB = registeMethodOnWindow(
     'deleteConversationGroup'
   );
-  window.getConversationGroup = registeMethodOnWindow('getConversationGroup');
-  window.getConversationGroups = registeMethodOnWindow('getConversationGroups');
-  window.getAllConversationGroups = registeMethodOnWindow(
+  window.deleteAllConversationGroupDB = registeMethodOnWindow(
+    'deleteAllConversationGroups'
+  );
+  window.getConversationGroupDB = registeMethodOnWindow('getConversationGroup');
+  window.getConversationGroupsDB = registeMethodOnWindow(
+    'getConversationGroups'
+  );
+  window.getAllConversationGroupsDB = registeMethodOnWindow(
     'getAllConversationGroups'
   );
-  window.updateConversationGroupSerial = registeMethodOnWindow(
+  window.updateConversationGroupSerialDB = registeMethodOnWindow(
     'updateConversationGroupSerial'
   );
-  window.replaceConversationGroupMembers = registeMethodOnWindow(
-    'replaceConversationGroupMembers'
-  );
-  window.addConversationGroupMembers = registeMethodOnWindow(
+  window.addConversationGroupMembersDB = registeMethodOnWindow(
     'addConversationGroupMembers'
   );
-  window.removeConversationGroupMembers = registeMethodOnWindow(
+  window.removeConversationGroupMembersDB = registeMethodOnWindow(
     'removeConversationGroupMembers'
   );
-  window.getConversationGroupIDsByConversationID = registeMethodOnWindow(
+  window.getConversationGroupIDsByConversationIdDB = registeMethodOnWindow(
     'getConversationGroupIDsByConversationID'
   );
-  window.getConversationIDsByGroupID = registeMethodOnWindow(
+  window.getConversationIDsByGroupIdDB = registeMethodOnWindow(
     'getConversationIDsByGroupID'
   );
-  window.deleteConversationGroupMembersByGroupID = registeMethodOnWindow(
+  window.deleteConversationGroupMembersByGroupIdDB = registeMethodOnWindow(
     'deleteConversationGroupMembersByGroupID'
   );
 }

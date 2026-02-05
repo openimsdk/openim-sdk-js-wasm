@@ -20,6 +20,7 @@ import {
   GroupMessageReaderFilter,
   GroupAtType,
   ViewType,
+  ConversationGroupType,
 } from './enum';
 
 export type WasmPathConfig = {
@@ -146,6 +147,8 @@ export type SetConversationParams = {
   isPinned?: boolean;
   isPrivateChat?: boolean;
   isMsgDestruct?: boolean;
+  isMarked?: boolean;
+  remark?: string;
   ex?: string;
 };
 export type SetConversationPrivateStateParams = {
@@ -469,4 +472,52 @@ export type SetConversationPinnedMsgParams = {
 export type DeleteUserMsgInConvParams = {
   conversationID: string;
   userID: string;
+};
+
+export type CreateConversationGroupReq = {
+  name: string;
+  order?: number;
+  ex?: string;
+  conversationID?: string;
+  conversationGroupType?: ConversationGroupType;
+};
+
+export type UpdateConversationGroupReq = {
+  conversationGroupID: string;
+  name?: string;
+  ex?: string;
+  hidden?: boolean;
+};
+
+export type GetConversationGroupInfoWithConversationsReq = {
+  conversationGroupID: string;
+  pagination: {
+    pageNumber: number;
+    showNumber: number;
+  };
+};
+
+export type SetConversationGroupOrderReq = {
+  conversationGroupID: string;
+  order: number;
+};
+
+export type AddConversationsToGroupParams = {
+  conversationIDs: string[];
+  conversationGroupIDs: string[];
+};
+
+export type RemoveConversationsFromGroupParams = {
+  conversationIDs: string[];
+  conversationGroupIDs: string[];
+};
+
+export type SpeechToTextParams = {
+  filename: string;
+  data: string | ArrayBuffer;
+};
+
+export type SetMessageLocalContentParams = {
+  conversationID: string;
+  message: MessageItem;
 };

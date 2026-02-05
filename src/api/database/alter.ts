@@ -1,12 +1,11 @@
 import { Database } from '@jlongster/sql.js';
-import { getAllConversationIDList } from './conversation';
 
 export function alterTable(db: Database) {
   alter351(db);
   alter380(db);
   alter381(db);
-  // await alter384(db);
   alter383p8(db);
+  alter384(db);
 }
 
 function alter351(db: Database) {
@@ -45,34 +44,44 @@ function alter381(db: Database) {
   }
 }
 
-async function alter384(db: Database) {
-  try {
-    // @ts-ignore
-    const { data: idListStr } = await getAllConversationIDList();
-    console.log(idListStr);
-    (JSON.parse(idListStr) as string[]).map(id => {
-      try {
-        db.exec(
-          `
-            ALTER TABLE 'chat_logs_${id}' ADD COLUMN dst_user_ids text;
-            `
-        );
-      } catch (error) {
-        console.warn(error);
-        // alter table error
-      }
-    });
-  } catch (error) {
-    // get conversation id list error
-  }
-}
-
 function alter383p8(db: Database) {
   try {
     db.exec(
       `
         ALTER TABLE local_users ADD COLUMN add_friend_permission numeric;
         `
+    );
+  } catch (error) {
+    // alter table error
+  }
+}
+
+function alter384(db: Database) {
+  try {
+    db.exec(
+      `
+        ALTER TABLE local_conversations ADD COLUMN is_marked numeric;
+      `
+    );
+  } catch (error) {
+    // alter table error
+  }
+
+  try {
+    db.exec(
+      `
+        ALTER TABLE local_conversations ADD COLUMN remark varchar(1024);
+      `
+    );
+  } catch (error) {
+    // alter table error
+  }
+
+  try {
+    db.exec(
+      `
+        ALTER TABLE local_groups ADD COLUMN mute_bypass_user_ids TEXT;
+      `
     );
   } catch (error) {
     // alter table error

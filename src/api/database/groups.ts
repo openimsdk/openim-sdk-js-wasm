@@ -312,7 +312,10 @@ export async function batchInsertGroup(
 
     list.map(item => {
       const localGroup = convertToSnakeCaseObject(
-        convertObjectField(item, { groupName: 'name' })
+        convertObjectField(item, {
+          groupName: 'name',
+          muteBypassUserIDs: 'mute_bypass_user_ids',
+        })
       ) as LocalGroup;
       databaseInsertGroup(db, localGroup);
 
