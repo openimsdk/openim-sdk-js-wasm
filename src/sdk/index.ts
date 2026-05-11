@@ -130,6 +130,7 @@ import {
   Platform,
 } from '@/types/enum';
 import { logBoxStyleValue } from '@/utils';
+
 class SDK extends Emitter {
   private wasmInitializedPromise: Promise<any>;
   private goExitPromise: Promise<void> | undefined;
@@ -1504,6 +1505,7 @@ class SDK extends Emitter {
       operationID,
       data.groupID,
       data.isMute,
+      JSON.stringify(data.muteBypassUserIDs ?? []),
     ]);
   };
   changeGroupMemberMute = <T>(
@@ -1564,6 +1566,20 @@ class SDK extends Emitter {
       'getGroupApplicationUnhandledCount ',
       window.getGroupApplicationUnhandledCount,
       [operationID, JSON.stringify(data)]
+    );
+  };
+  getGroupApplicationBadgeCount = (operationID = uuidv4()) => {
+    return this._invoker<number>(
+      'getGroupApplicationBadgeCount ',
+      window.getGroupApplicationBadgeCount,
+      [operationID]
+    );
+  };
+  clearGroupApplicationBadgeCount = (operationID = uuidv4()) => {
+    return this._invoker<void>(
+      'clearGroupApplicationBadgeCount ',
+      window.clearGroupApplicationBadgeCount,
+      [operationID]
     );
   };
   deleteGroupRequests = (

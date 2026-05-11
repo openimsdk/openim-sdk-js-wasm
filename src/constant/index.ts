@@ -50,6 +50,7 @@ export enum CbEvents {
   OnGroupDismissed = 'OnGroupDismissed',
   OnGroupMemberAdded = 'OnGroupMemberAdded',
   OnGroupMemberDeleted = 'OnGroupMemberDeleted',
+  OnGroupApplicationBadgeCountChanged = 'OnGroupApplicationBadgeCountChanged',
   OnGroupApplicationAdded = 'OnGroupApplicationAdded',
   OnGroupApplicationDeleted = 'OnGroupApplicationDeleted',
   OnGroupInfoChanged = 'OnGroupInfoChanged',

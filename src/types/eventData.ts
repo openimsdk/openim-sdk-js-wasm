@@ -31,6 +31,7 @@ export type EventDataMap = {
   [CbEvents.OnFriendApplicationRejected]: FriendApplicationItem;
   [CbEvents.OnFriendDeleted]: FriendUserItem;
   [CbEvents.OnFriendInfoChanged]: FriendUserItem;
+  [CbEvents.OnGroupApplicationBadgeCountChanged]: number;
   [CbEvents.OnGroupApplicationAdded]: GroupApplicationItem;
   [CbEvents.OnGroupApplicationDeleted]: GroupApplicationItem;
   [CbEvents.OnGroupApplicationRejected]: GroupApplicationItem;

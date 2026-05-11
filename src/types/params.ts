@@ -181,6 +181,7 @@ export type SearchGroupParams = {
 export type ChangeGroupMuteParams = {
   groupID: string;
   isMute: boolean;
+  muteBypassUserIDs?: string[];
 };
 export type ChangeGroupMemberMuteParams = {
   groupID: string;

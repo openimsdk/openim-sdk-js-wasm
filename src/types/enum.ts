@@ -95,6 +95,7 @@ export enum MessageType {
   GroupNameUpdated = 1520,
   BurnMessageChange = 1701,
   RevokeMessage = 2101,
+  DeletedMessage = 2102,
 
   MsgPinned = 2400,
 }

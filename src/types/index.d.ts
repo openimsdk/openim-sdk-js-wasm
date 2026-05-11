@@ -828,6 +828,8 @@ declare global {
       operationID: string,
       time: number
     ) => Promise<number>;
+    getGroupApplicationBadgeCount: (operationID: string) => Promise<number>;
+    clearGroupApplicationBadgeCount: (operationID: string) => Promise<string>;
     deleteGroupRequests: (
       params: string,
       operationID: string

@@ -68,7 +68,7 @@ const InternalConstraint = [
   ['version_id', 'versionID'],
   ['display_is_read', 'displayIsRead'],
   ['add_friend_permission', 'addFriendPermission'],
-  ['mute_bypass_user_ids', 'MuteBypassUserIDs'],
+  ['mute_bypass_user_ids', 'muteBypassUserIDs'],
   ['conversation_group_id', 'conversationGroupID'],
   ['conversation_ids', 'conversationIDs'],
 ];

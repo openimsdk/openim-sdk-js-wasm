@@ -1,6 +1,6 @@
 {
   "name": "@openim/wasm-client-sdk",
-  "version": "3.8.4-next.8",
+  "version": "3.8.5-hotfix.0",
   "description": "open im sdk for web",
   "source": "src/index.ts",
   "main": "lib/index.js",
