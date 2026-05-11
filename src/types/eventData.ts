@@ -13,6 +13,7 @@ import {
   ReceiptInfo,
   RevokedInfo,
   SelfUserInfo,
+  UploadProgressData,
   UserOnlineState,
 } from './entity';
 
@@ -60,6 +61,7 @@ export type EventDataMap = {
   [CbEvents.OnKickedOffline]: void;
   [CbEvents.OnUserTokenExpired]: void;
   [CbEvents.OnUserTokenInvalid]: void;
+  [CbEvents.UploadComplete]: UploadProgressData;
 };
 
 export type DataOfEvent<E extends CbEvents> = E extends keyof EventDataMap

@@ -5,6 +5,9 @@ import alias from '@rollup/plugin-alias';
 import polyfillNode from 'rollup-plugin-polyfill-node';
 import terser from '@rollup/plugin-terser';
 
+const resolveExtensions = ['.mjs', '.js', '.json', '.node', '.ts', '.tsx'];
+const typescriptInclude = ['**/*.ts', '**/*.tsx', '**/*.cts', '**/*.mts'];
+
 export default [
   {
     input: 'src/index.ts',
@@ -29,7 +32,14 @@ export default [
         sourcemap: false,
       },
     ],
-    plugins: [alias(), typescript(), resolve(), commonjs()],
+    plugins: [
+      alias(),
+      resolve({ extensions: resolveExtensions }),
+      typescript({
+        include: typescriptInclude,
+      }),
+      commonjs(),
+    ],
   },
   {
     input: 'src/api/worker.ts',
@@ -47,10 +57,11 @@ export default [
     ],
     plugins: [
       alias(),
+      resolve({ extensions: resolveExtensions }),
       typescript({
         tsconfig: './tsconfig.build.json',
+        include: typescriptInclude,
       }),
-      resolve(),
       commonjs(),
       polyfillNode(),
       terser(),

@@ -288,6 +288,7 @@ export function searchMessageByKeyword(
   db: Database,
   conversationID: string,
   contentType: number[],
+  senderUserIDList: string[],
   keywordList: string[],
   keywordListMatchType: number,
   startTime: number,
@@ -309,6 +310,12 @@ export function searchMessageByKeyword(
       subCondition +=
         'content like ' + "'%" + keywordList[index] + "%' " + connectStr;
     }
+
+    if (senderUserIDList.length) {
+      subCondition += `AND send_id IN (${senderUserIDList
+        .map(id => `'${id}'`)
+        .join(',')})`;
+    }
   });
   return db.exec(
     `  
@@ -326,6 +333,7 @@ export function searchMessageByContentType(
   db: Database,
   conversationID: string,
   contentType: number[],
+  senderUserIDList: string[],
   startTime: number,
   endTime: number,
   offset: number,
@@ -333,12 +341,16 @@ export function searchMessageByContentType(
 ): QueryExecResult[] {
   const values = contentType.map(v => `${v}`).join(',');
   const finalEndTime = endTime ? endTime : new Date().getTime();
+  const sendIDCondition = senderUserIDList.length
+    ? `AND send_id IN (${senderUserIDList.map(id => `'${id}'`).join(',')})`
+    : '';
   return db.exec(
     `  
     SELECT * FROM 'chat_logs_${conversationID}' 
           WHERE send_time between ${startTime} and ${finalEndTime} 
           AND status <=3 
           And content_type IN (${values}) 
+          ${sendIDCondition}
     ORDER BY send_time DESC LIMIT ${count} OFFSET ${offset};
     `
   );
@@ -348,6 +360,7 @@ export function searchMessageByContentTypeAndKeyword(
   db: Database,
   conversationID: string,
   contentType: number[],
+  senderUserIDList: string[],
   keywordList: string[],
   keywordListMatchType: number,
   startTime: number,
@@ -368,6 +381,9 @@ export function searchMessageByContentTypeAndKeyword(
         'content like ' + "'%" + keywordList[index] + "%' " + connectStr;
     }
   });
+  const sendIDCondition = senderUserIDList.length
+    ? `AND send_id IN (${senderUserIDList.map(id => `'${id}'`).join(',')})`
+    : '';
   return db.exec(
     `  
       SELECT * FROM 'chat_logs_${conversationID}' 
@@ -375,6 +391,7 @@ export function searchMessageByContentTypeAndKeyword(
             AND status <=3 
             And content_type IN (${values}) 
             ${subCondition}
+            ${sendIDCondition}
       ORDER BY send_time DESC;
       `
   );

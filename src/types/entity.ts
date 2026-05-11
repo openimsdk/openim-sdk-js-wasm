@@ -431,8 +431,8 @@ export type RtcInvite = {
   roomID: string;
   timeout: number;
   mediaType: string;
-  sessionType: number;
-  platformID: number;
+  sessionType: SessionType;
+  platformID: Platform;
   initiateTime?: number;
   busyLineUserIDList?: string[];
 };
@@ -477,4 +477,10 @@ export type CallingRoomData = {
   participant?: ParticipantInfo[];
   invitation?: RtcInvite;
   roomID: string;
+};
+
+export type UploadProgressData = {
+  fileSize: number;
+  streamSize: number;
+  uuid: string;
 };
