@@ -5,6 +5,10 @@ import alias from '@rollup/plugin-alias';
 import polyfillNode from 'rollup-plugin-polyfill-node';
 import terser from '@rollup/plugin-terser';
 
+const typescriptOptions = {
+  include: ['*.ts', '**/*.ts', '**/*.tsx', '**/*.cts', '**/*.mts'],
+};
+
 export default [
   {
     input: 'src/index.ts',
@@ -29,7 +33,7 @@ export default [
         sourcemap: false,
       },
     ],
-    plugins: [alias(), typescript(), resolve(), commonjs()],
+    plugins: [alias(), typescript(typescriptOptions), resolve(), commonjs()],
   },
   {
     input: 'src/api/worker.ts',
@@ -48,6 +52,7 @@ export default [
     plugins: [
       alias(),
       typescript({
+        ...typescriptOptions,
         tsconfig: './tsconfig.build.json',
       }),
       resolve(),
