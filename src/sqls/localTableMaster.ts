@@ -11,3 +11,7 @@ export function getExistedTables(db: Database): QueryExecResult[] {
     `
   );
 }
+
+export function getExistTables(db: Database): QueryExecResult[] {
+  return getExistedTables(db);
+}

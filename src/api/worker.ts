@@ -55,6 +55,11 @@ import {
   getLoginUser,
   insertLoginUser,
   updateLoginUser,
+  updateLoginUserByMap,
+  processUserCommandGetAll,
+  processUserCommandAdd,
+  processUserCommandUpdate,
+  processUserCommandDelete,
   getStrangerInfo,
   setStrangerInfo,
 
@@ -165,6 +170,7 @@ import {
   markConversationMessageAsRead,
   markConversationMessageAsReadBySeqs,
   markDeleteConversationAllMessages,
+  cleanDuplicateInvalidMessages,
   getUnreadMessage,
   getConversationPeerNormalMsgSeq,
   getConversationNormalMsgSeq,
@@ -193,6 +199,7 @@ import {
   getNotificationAllSeqs,
   batchInsertNotificationSeq,
   getExistedTables,
+  getExistTables,
 } from '../api/database';
 
 import { getInstance } from './database/instance';
@@ -267,6 +274,10 @@ rpc.registerMethod(
   'markDeleteConversationAllMessages',
   markDeleteConversationAllMessages
 );
+rpc.registerMethod(
+  'cleanDuplicateInvalidMessages',
+  cleanDuplicateInvalidMessages
+);
 rpc.registerMethod('getUnreadMessage', getUnreadMessage);
 rpc.registerMethod(
   'markConversationMessageAsReadBySeqs',
@@ -337,6 +348,11 @@ rpc.registerMethod('searchConversations', searchConversations);
 rpc.registerMethod('getLoginUser', getLoginUser);
 rpc.registerMethod('insertLoginUser', insertLoginUser);
 rpc.registerMethod('updateLoginUser', updateLoginUser);
+rpc.registerMethod('updateLoginUserByMap', updateLoginUserByMap);
+rpc.registerMethod('processUserCommandGetAll', processUserCommandGetAll);
+rpc.registerMethod('processUserCommandAdd', processUserCommandAdd);
+rpc.registerMethod('processUserCommandUpdate', processUserCommandUpdate);
+rpc.registerMethod('processUserCommandDelete', processUserCommandDelete);
 rpc.registerMethod('getStrangerInfo', getStrangerInfo);
 rpc.registerMethod('setStrangerInfo', setStrangerInfo);
 
@@ -479,6 +495,7 @@ rpc.registerMethod('batchInsertNotificationSeq', batchInsertNotificationSeq);
 rpc.registerMethod('setNotificationSeq', setNotificationSeq);
 
 rpc.registerMethod('getExistedTables', getExistedTables);
+rpc.registerMethod('getExistTables', getExistTables);
 
 rpc.registerMethod('exec', async (sql: string) => {
   const db = await getInstance();

@@ -18,3 +18,4 @@ export * from './localAppSdkVersion';
 export * from './versionSync';
 export * from './notification';
 export * from './tableMaster';
+export * from './userCommand';

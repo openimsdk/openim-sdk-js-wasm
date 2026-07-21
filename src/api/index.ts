@@ -261,6 +261,9 @@ export function initDatabaseAPI(isLogStandardOutput = true): void {
   window.markDeleteConversationAllMessages = registeMethodOnWindow(
     'markDeleteConversationAllMessages'
   );
+  window.cleanDuplicateInvalidMessages = registeMethodOnWindow(
+    'cleanDuplicateInvalidMessages'
+  );
   window.getUnreadMessage = registeMethodOnWindow('getUnreadMessage');
   window.markConversationMessageAsReadBySeqs = registeMethodOnWindow(
     'markConversationMessageAsReadBySeqs'
@@ -362,6 +365,17 @@ export function initDatabaseAPI(isLogStandardOutput = true): void {
   window.getLoginUser = registeMethodOnWindow('getLoginUser');
   window.insertLoginUser = registeMethodOnWindow('insertLoginUser');
   window.updateLoginUser = registeMethodOnWindow('updateLoginUser');
+  window.updateLoginUserByMap = registeMethodOnWindow('updateLoginUserByMap');
+  window.processUserCommandGetAll = registeMethodOnWindow(
+    'processUserCommandGetAll'
+  );
+  window.processUserCommandAdd = registeMethodOnWindow('processUserCommandAdd');
+  window.processUserCommandUpdate = registeMethodOnWindow(
+    'processUserCommandUpdate'
+  );
+  window.processUserCommandDelete = registeMethodOnWindow(
+    'processUserCommandDelete'
+  );
   window.getStrangerInfo = registeMethodOnWindow('getStrangerInfo');
   window.setStrangerInfo = registeMethodOnWindow('setStrangerInfo');
 
@@ -640,6 +654,7 @@ export function initDatabaseAPI(isLogStandardOutput = true): void {
   );
 
   window.getExistedTables = registeMethodOnWindow('getExistedTables');
+  window.getExistTables = registeMethodOnWindow('getExistTables');
 }
 
 export const workerPromise = rpc?.connect(5000);

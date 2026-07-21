@@ -178,11 +178,15 @@ export function getConversationNormalMsgSeq(
 export function getConversationPeerNormalMsgSeq(
   db: Database,
   conversationID: string,
-  loginUserID: string
+  loginUserID?: string
 ): QueryExecResult[] {
+  _initLocalChatLogsTable(db, conversationID);
+  const peerFilter = loginUserID
+    ? `send_id != '${loginUserID}'`
+    : 'send_id != (SELECT user_id FROM local_users LIMIT 1)';
   return db.exec(
     `
-      SELECT seq FROM 'chat_logs_${conversationID}' where send_id != '${loginUserID}' order by seq desc limit 1;
+      SELECT seq FROM 'chat_logs_${conversationID}' where ${peerFilter} order by seq desc limit 1;
       `
   );
 }
@@ -288,35 +292,39 @@ export function searchMessageByKeyword(
   db: Database,
   conversationID: string,
   contentType: number[],
-  senderUserIDList: string[],
   keywordList: string[],
   keywordListMatchType: number,
   startTime: number,
   endTime: number,
   offset: number,
-  count: number
+  count: number,
+  senderUserIDList: string[] = []
 ): QueryExecResult[] {
+  _initLocalChatLogsTable(db, conversationID);
+  const safeContentType = Array.isArray(contentType) ? contentType : [];
+  const safeKeywordList = Array.isArray(keywordList) ? keywordList : [];
+  const safeSenderUserIDList = Array.isArray(senderUserIDList)
+    ? senderUserIDList
+    : [];
   const finalEndTime = endTime ? endTime : new Date().getTime();
   let subCondition = '';
-  const values = contentType.map(v => `${v}`).join(',');
+  const values = safeContentType.map(v => `${v}`).join(',');
   const connectStr = keywordListMatchType === 0 ? 'or ' : 'and ';
-  keywordList.forEach((keyword, index) => {
+  safeKeywordList.forEach((keyword, index) => {
     if (index == 0) {
       subCondition += 'And (';
     }
-    if (index + 1 >= keywordList.length) {
-      subCondition += 'content like ' + "'%" + keywordList[index] + "%') ";
+    if (index + 1 >= safeKeywordList.length) {
+      subCondition += 'content like ' + "'%" + keyword + "%') ";
     } else {
-      subCondition +=
-        'content like ' + "'%" + keywordList[index] + "%' " + connectStr;
-    }
-
-    if (senderUserIDList.length) {
-      subCondition += `AND send_id IN (${senderUserIDList
-        .map(id => `'${id}'`)
-        .join(',')})`;
+      subCondition += 'content like ' + "'%" + keyword + "%' " + connectStr;
     }
   });
+  if (safeSenderUserIDList.length) {
+    subCondition += ` AND send_id IN (${safeSenderUserIDList
+      .map(id => `'${id}'`)
+      .join(',')})`;
+  }
   return db.exec(
     `  
     SELECT * FROM 'chat_logs_${conversationID}' 
@@ -333,16 +341,21 @@ export function searchMessageByContentType(
   db: Database,
   conversationID: string,
   contentType: number[],
-  senderUserIDList: string[],
   startTime: number,
   endTime: number,
   offset: number,
-  count: number
+  count: number,
+  senderUserIDList: string[] = []
 ): QueryExecResult[] {
-  const values = contentType.map(v => `${v}`).join(',');
+  _initLocalChatLogsTable(db, conversationID);
+  const safeContentType = Array.isArray(contentType) ? contentType : [];
+  const safeSenderUserIDList = Array.isArray(senderUserIDList)
+    ? senderUserIDList
+    : [];
+  const values = safeContentType.map(v => `${v}`).join(',');
   const finalEndTime = endTime ? endTime : new Date().getTime();
-  const sendIDCondition = senderUserIDList.length
-    ? `AND send_id IN (${senderUserIDList.map(id => `'${id}'`).join(',')})`
+  const sendIDCondition = safeSenderUserIDList.length
+    ? `AND send_id IN (${safeSenderUserIDList.map(id => `'${id}'`).join(',')})`
     : '';
   return db.exec(
     `  
@@ -360,29 +373,34 @@ export function searchMessageByContentTypeAndKeyword(
   db: Database,
   conversationID: string,
   contentType: number[],
-  senderUserIDList: string[],
   keywordList: string[],
   keywordListMatchType: number,
   startTime: number,
-  endTime: number
+  endTime: number,
+  senderUserIDList: string[] = []
 ): QueryExecResult[] {
-  const values = contentType.map(v => `${v}`).join(',');
+  _initLocalChatLogsTable(db, conversationID);
+  const safeContentType = Array.isArray(contentType) ? contentType : [];
+  const safeKeywordList = Array.isArray(keywordList) ? keywordList : [];
+  const safeSenderUserIDList = Array.isArray(senderUserIDList)
+    ? senderUserIDList
+    : [];
+  const values = safeContentType.map(v => `${v}`).join(',');
   const finalEndTime = endTime ? endTime : new Date().getTime();
   let subCondition = '';
   const connectStr = keywordListMatchType === 0 ? 'or ' : 'and ';
-  keywordList.forEach((keyword, index) => {
+  safeKeywordList.forEach((keyword, index) => {
     if (index == 0) {
       subCondition += 'And (';
     }
-    if (index + 1 >= keywordList.length) {
-      subCondition += 'content like ' + "'%" + keywordList[index] + "%') ";
+    if (index + 1 >= safeKeywordList.length) {
+      subCondition += 'content like ' + "'%" + keyword + "%') ";
     } else {
-      subCondition +=
-        'content like ' + "'%" + keywordList[index] + "%' " + connectStr;
+      subCondition += 'content like ' + "'%" + keyword + "%' " + connectStr;
     }
   });
-  const sendIDCondition = senderUserIDList.length
-    ? `AND send_id IN (${senderUserIDList.map(id => `'${id}'`).join(',')})`
+  const sendIDCondition = safeSenderUserIDList.length
+    ? `AND send_id IN (${safeSenderUserIDList.map(id => `'${id}'`).join(',')})`
     : '';
   return db.exec(
     `  
@@ -498,6 +516,52 @@ export function markDeleteConversationAllMessages(
   );
 }
 
+// MsgStatusHasDeleted = 4; remove zero-sendTime / duplicate invalid messages.
+export function cleanDuplicateInvalidMessages(
+  db: Database,
+  conversationID: string
+): QueryExecResult[] {
+  _initLocalChatLogsTable(db, conversationID);
+  const tableName = `'chat_logs_${conversationID}'`;
+  return db.exec(
+    `
+      DELETE FROM ${tableName}
+      WHERE seq > 0 AND send_time = 0;
+
+      DELETE FROM ${tableName}
+      WHERE seq > 0
+        AND status >= 4
+        AND seq IN (
+          SELECT seq FROM ${tableName} WHERE seq > 0 AND status < 4 GROUP BY seq
+        );
+
+      WITH ranked AS (
+        SELECT
+          client_msg_id,
+          ROW_NUMBER() OVER (
+            PARTITION BY seq
+            ORDER BY
+              send_time ASC,
+              client_msg_id ASC
+          ) AS row_num
+        FROM ${tableName}
+        WHERE seq > 0
+          AND status >= 4
+          AND seq NOT IN (
+            SELECT seq FROM ${tableName} WHERE seq > 0 AND status < 4 GROUP BY seq
+          )
+          AND seq IN (
+            SELECT seq FROM ${tableName} WHERE seq > 0 AND status >= 4 GROUP BY seq HAVING COUNT(*) > 1
+          )
+      )
+      DELETE FROM ${tableName}
+      WHERE client_msg_id IN (
+        SELECT client_msg_id FROM ranked WHERE row_num > 1
+      );
+      `
+  );
+}
+
 export function getUnreadMessage(
   db: Database,
   conversationID: string,
@@ -600,6 +664,7 @@ export function searchAllMessageByContentType(
   conversationID: string,
   contentType: number
 ): QueryExecResult[] {
+  _initLocalChatLogsTable(db, conversationID);
   return db.exec(
     `
       SELECT * FROM 'chat_logs_${conversationID}' WHERE content_type = ${contentType};

@@ -65,6 +65,7 @@ declare global {
     getConversationPeerNormalMsgSeq: DatabaseApi;
     deleteConversationAllMessages: DatabaseApi;
     markDeleteConversationAllMessages: DatabaseApi;
+    cleanDuplicateInvalidMessages: DatabaseApi;
     getUnreadMessage: DatabaseApi;
     markConversationMessageAsReadBySeqs: DatabaseApi;
     markConversationMessageAsReadDB: DatabaseApi;
@@ -112,6 +113,11 @@ declare global {
     getLoginUser: DatabaseApi;
     insertLoginUser: DatabaseApi;
     updateLoginUser: DatabaseApi;
+    updateLoginUserByMap: DatabaseApi;
+    processUserCommandGetAll: DatabaseApi;
+    processUserCommandAdd: DatabaseApi;
+    processUserCommandUpdate: DatabaseApi;
+    processUserCommandDelete: DatabaseApi;
     getStrangerInfo: DatabaseApi;
     setStrangerInfo: DatabaseApi;
     getJoinedSuperGroupList: DatabaseApi;
@@ -247,6 +253,7 @@ declare global {
 
     // table master
     getExistedTables: DatabaseApi;
+    getExistTables: DatabaseApi;
 
     // registered by go wasm
     initSDK: (operationID: string, config: string) => void;

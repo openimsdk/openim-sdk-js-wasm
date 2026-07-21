@@ -29,6 +29,7 @@ import {
   updateMsgSenderFaceURLAndSenderNickname as databaseUpdateMsgSenderFaceURLAndSenderNickname,
   deleteConversationAllMessages as databaseDeleteConversationAllMessages,
   markDeleteConversationAllMessages as databaseMarkDeleteConversationAllMessages,
+  cleanDuplicateInvalidMessages as databaseCleanDuplicateInvalidMessages,
   getUnreadMessage as databaseGetUnreadMessage,
   markConversationMessageAsReadBySeqs as databaseMarkConversationMessageAsReadBySeqs,
   markConversationMessageAsRead as databaseMarkConversationMessageAsRead,
@@ -353,7 +354,7 @@ export async function getConversationNormalMsgSeq(
 
 export async function getConversationPeerNormalMsgSeq(
   conversationID: string,
-  loginUserID: string
+  loginUserID?: string
 ): Promise<string> {
   try {
     const db = await getInstance();
@@ -593,7 +594,6 @@ export async function getMultipleMessage(
 export async function searchMessageByKeyword(
   conversationID: string,
   contentTypeStr: string,
-  senderUserIDListStr: string,
   keywordListStr: string,
   keywordListMatchType: number,
   startTime: number,
@@ -608,7 +608,6 @@ export async function searchMessageByKeyword(
       db,
       conversationID,
       JSON.parse(contentTypeStr),
-      JSON.parse(senderUserIDListStr),
       JSON.parse(keywordListStr),
       keywordListMatchType,
       startTime,
@@ -638,7 +637,6 @@ export async function searchMessageByKeyword(
 export async function searchMessageByContentType(
   conversationID: string,
   contentTypeStr: string,
-  senderUserIDListStr: string,
   startTime: number,
   endTime: number,
   offset: number,
@@ -651,7 +649,6 @@ export async function searchMessageByContentType(
       db,
       conversationID,
       JSON.parse(contentTypeStr),
-      JSON.parse(senderUserIDListStr),
       startTime,
       endTime,
       offset,
@@ -679,7 +676,6 @@ export async function searchMessageByContentType(
 export async function searchMessageByContentTypeAndKeyword(
   conversationID: string,
   contentTypeStr: string,
-  senderUserIDListStr: string,
   keywordListStr: string,
   keywordListMatchType: number,
   startTime: number,
@@ -692,7 +688,6 @@ export async function searchMessageByContentTypeAndKeyword(
       db,
       conversationID,
       JSON.parse(contentTypeStr),
-      JSON.parse(senderUserIDListStr) ?? [],
       JSON.parse(keywordListStr),
       keywordListMatchType,
       startTime,
@@ -794,6 +789,26 @@ export async function markDeleteConversationAllMessages(
     const db = await getInstance();
 
     databaseMarkDeleteConversationAllMessages(db, conversationID);
+
+    return formatResponse('');
+  } catch (e) {
+    console.error(e);
+
+    return formatResponse(
+      undefined,
+      DatabaseErrorCode.ErrorInit,
+      JSON.stringify(e)
+    );
+  }
+}
+
+export async function cleanDuplicateInvalidMessages(
+  conversationID: string
+): Promise<string> {
+  try {
+    const db = await getInstance();
+
+    databaseCleanDuplicateInvalidMessages(db, conversationID);
 
     return formatResponse('');
   } catch (e) {
@@ -953,16 +968,12 @@ export async function deleteConversationMsgs(
 
 export async function markConversationAllMessageAsRead(
   conversationID: string,
-  clientMsgIDListStr: string
+  loginUserID: string
 ): Promise<string> {
   try {
     const db = await getInstance();
 
-    databaseMarkConversationAllMessageAsRead(
-      db,
-      conversationID,
-      JSON.parse(clientMsgIDListStr)
-    );
+    databaseMarkConversationAllMessageAsRead(db, conversationID, loginUserID);
 
     return formatResponse(db.getRowsModified());
   } catch (e) {
@@ -978,15 +989,17 @@ export async function markConversationAllMessageAsRead(
 
 export async function searchAllMessageByContentType(
   conversationID: string,
-  clientMsgIDListStr: string
+  contentType: number | string
 ): Promise<string> {
   try {
     const db = await getInstance();
+    const parsedContentType =
+      typeof contentType === 'string' ? JSON.parse(contentType) : contentType;
 
     const execResult = databaseSearchAllMessageByContentType(
       db,
       conversationID,
-      JSON.parse(clientMsgIDListStr)
+      parsedContentType
     );
 
     return formatResponse(

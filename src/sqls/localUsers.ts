@@ -52,3 +52,18 @@ export function updateLoginUser(
 
   return db.exec(sql);
 }
+
+export function updateLoginUserByMap(
+  db: Database,
+  userID: string,
+  args: ClientUser
+): QueryExecResult[] {
+  const sql = squel
+    .update()
+    .table('local_users')
+    .setFields(args)
+    .where(`user_id = '${userID}'`)
+    .toString();
+
+  return db.exec(sql);
+}

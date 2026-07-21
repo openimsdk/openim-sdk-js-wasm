@@ -4,6 +4,7 @@ import {
   getLoginUser as databaseGetLoginUser,
   insertLoginUser as databaseInsertLoginUser,
   updateLoginUser as databaseUpdateLoginUser,
+  updateLoginUserByMap as databaseUpdateLoginUserByMap,
 } from '@/sqls';
 import {
   formatResponse,
@@ -77,6 +78,36 @@ export async function updateLoginUser(userStr: string): Promise<string> {
       throw 'updateLoginUser no record updated';
     }
     return formatResponse(execResult);
+  } catch (e) {
+    console.error(e);
+
+    return formatResponse(
+      undefined,
+      DatabaseErrorCode.ErrorInit,
+      JSON.stringify(e)
+    );
+  }
+}
+
+export async function updateLoginUserByMap(
+  userID: string,
+  args: Record<string, unknown> | string
+): Promise<string> {
+  try {
+    const db = await getInstance();
+    const parsedArgs = typeof args === 'string' ? JSON.parse(args) : args;
+    const userArgs = convertToSnakeCaseObject(
+      convertObjectField(parsedArgs, { nickname: 'name' })
+    ) as ClientUser;
+    delete userArgs.user_id;
+
+    databaseUpdateLoginUserByMap(db, userID, userArgs);
+    const modified = db.getRowsModified();
+    if (modified === 0) {
+      throw 'updateLoginUserByMap no record updated';
+    }
+
+    return formatResponse('');
   } catch (e) {
     console.error(e);
 

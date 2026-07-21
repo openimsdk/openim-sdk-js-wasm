@@ -18,6 +18,7 @@ import {
   localSendingMessages,
   localAppSDKVersions,
   localVersionSyncs,
+  localUserCommands,
 } from '@/sqls';
 import { formatResponse } from '@/utils';
 import { QueryExecResult } from '@jlongster/sql.js';
@@ -47,6 +48,7 @@ export async function init(userId: string, dir: string): Promise<string> {
     const execResultLocalStrangers = localStranger(db);
     const execResultLocalConversations = localConversations(db);
     const execResultLocalUsers = localUsers(db);
+    const execResultLocalUserCommands = localUserCommands(db);
     const execResultLocalBlack = locaBlacks(db);
     const execResultLocalFriend = localFriends(db);
     const execResuLocalGroup = localGroups(db);
@@ -69,6 +71,7 @@ export async function init(userId: string, dir: string): Promise<string> {
         execResultLocalStrangers,
         execResultLocalConversations,
         execResultLocalUsers,
+        execResultLocalUserCommands,
         execResultLocalSuperGroups,
         execResultLocalConversationUnreadMessages,
         execResultLocalBlack,
