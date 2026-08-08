@@ -1,7 +1,12 @@
 import squel from 'squel';
 import { Database, QueryExecResult } from '@jlongster/sql.js';
+import { execPreparedQuery, SQLBinding } from '@/utils';
 
 export type ClientMessage = { [key: string]: any };
+
+function placeholders(length: number): string {
+  return length > 0 ? new Array(length).fill('?').join(', ') : 'NULL';
+}
 
 function _initLocalChatLogsTable(db: Database, conversationID: string) {
   localChatLogsConversationID(db, conversationID);
@@ -306,34 +311,37 @@ export function searchMessageByKeyword(
   const safeSenderUserIDList = Array.isArray(senderUserIDList)
     ? senderUserIDList
     : [];
-  const finalEndTime = endTime ? endTime : new Date().getTime();
-  let subCondition = '';
-  const values = safeContentType.map(v => `${v}`).join(',');
-  const connectStr = keywordListMatchType === 0 ? 'or ' : 'and ';
-  safeKeywordList.forEach((keyword, index) => {
-    if (index == 0) {
-      subCondition += 'And (';
-    }
-    if (index + 1 >= safeKeywordList.length) {
-      subCondition += 'content like ' + "'%" + keyword + "%') ";
-    } else {
-      subCondition += 'content like ' + "'%" + keyword + "%' " + connectStr;
-    }
-  });
-  if (safeSenderUserIDList.length) {
-    subCondition += ` AND send_id IN (${safeSenderUserIDList
-      .map(id => `'${id}'`)
-      .join(',')})`;
+  const conditions = [
+    'send_time BETWEEN ? AND ?',
+    'status <= ?',
+    `content_type IN (${placeholders(safeContentType.length)})`,
+  ];
+  const bindings: SQLBinding[] = [startTime, endTime, 3, ...safeContentType];
+
+  if (safeKeywordList.length > 0) {
+    const connector = keywordListMatchType === 0 ? ' OR ' : ' AND ';
+    conditions.push(
+      `(${safeKeywordList.map(() => 'content LIKE ?').join(connector)})`
+    );
+    bindings.push(...safeKeywordList.map(keyword => `%${keyword}%`));
   }
-  return db.exec(
-    `  
-    SELECT * FROM 'chat_logs_${conversationID}' 
-          WHERE send_time  between ${startTime} and ${finalEndTime} 
-          AND status <=3  
-          And content_type IN (${values}) 
-          ${subCondition}
-    ORDER BY send_time DESC LIMIT ${count} OFFSET ${offset};
+  if (safeSenderUserIDList.length > 0) {
+    conditions.push(
+      `send_id IN (${placeholders(safeSenderUserIDList.length)})`
+    );
+    bindings.push(...safeSenderUserIDList);
+  }
+  bindings.push(count, offset);
+
+  return execPreparedQuery(
+    db,
     `
+      SELECT * FROM 'chat_logs_${conversationID}'
+      WHERE ${conditions.join(' AND ')}
+      ORDER BY send_time DESC
+      LIMIT ? OFFSET ?
+    `,
+    bindings
   );
 }
 
@@ -352,20 +360,29 @@ export function searchMessageByContentType(
   const safeSenderUserIDList = Array.isArray(senderUserIDList)
     ? senderUserIDList
     : [];
-  const values = safeContentType.map(v => `${v}`).join(',');
-  const finalEndTime = endTime ? endTime : new Date().getTime();
-  const sendIDCondition = safeSenderUserIDList.length
-    ? `AND send_id IN (${safeSenderUserIDList.map(id => `'${id}'`).join(',')})`
-    : '';
-  return db.exec(
-    `  
-    SELECT * FROM 'chat_logs_${conversationID}' 
-          WHERE send_time between ${startTime} and ${finalEndTime} 
-          AND status <=3 
-          And content_type IN (${values}) 
-          ${sendIDCondition}
-    ORDER BY send_time DESC LIMIT ${count} OFFSET ${offset};
+  const conditions = [
+    'send_time BETWEEN ? AND ?',
+    'status <= ?',
+    `content_type IN (${placeholders(safeContentType.length)})`,
+  ];
+  const bindings: SQLBinding[] = [startTime, endTime, 3, ...safeContentType];
+  if (safeSenderUserIDList.length > 0) {
+    conditions.push(
+      `send_id IN (${placeholders(safeSenderUserIDList.length)})`
+    );
+    bindings.push(...safeSenderUserIDList);
+  }
+  bindings.push(count, offset);
+
+  return execPreparedQuery(
+    db,
     `
+      SELECT * FROM 'chat_logs_${conversationID}'
+      WHERE ${conditions.join(' AND ')}
+      ORDER BY send_time DESC
+      LIMIT ? OFFSET ?
+    `,
+    bindings
   );
 }
 
@@ -385,33 +402,35 @@ export function searchMessageByContentTypeAndKeyword(
   const safeSenderUserIDList = Array.isArray(senderUserIDList)
     ? senderUserIDList
     : [];
-  const values = safeContentType.map(v => `${v}`).join(',');
-  const finalEndTime = endTime ? endTime : new Date().getTime();
-  let subCondition = '';
-  const connectStr = keywordListMatchType === 0 ? 'or ' : 'and ';
-  safeKeywordList.forEach((keyword, index) => {
-    if (index == 0) {
-      subCondition += 'And (';
-    }
-    if (index + 1 >= safeKeywordList.length) {
-      subCondition += 'content like ' + "'%" + keyword + "%') ";
-    } else {
-      subCondition += 'content like ' + "'%" + keyword + "%' " + connectStr;
-    }
-  });
-  const sendIDCondition = safeSenderUserIDList.length
-    ? `AND send_id IN (${safeSenderUserIDList.map(id => `'${id}'`).join(',')})`
-    : '';
-  return db.exec(
-    `  
-      SELECT * FROM 'chat_logs_${conversationID}' 
-            WHERE send_time between ${startTime} and ${finalEndTime} 
-            AND status <=3 
-            And content_type IN (${values}) 
-            ${subCondition}
-            ${sendIDCondition}
-      ORDER BY send_time DESC;
-      `
+  const conditions = [
+    'send_time BETWEEN ? AND ?',
+    'status <= ?',
+    `content_type IN (${placeholders(safeContentType.length)})`,
+  ];
+  const bindings: SQLBinding[] = [startTime, endTime, 3, ...safeContentType];
+
+  if (safeKeywordList.length > 0) {
+    const connector = keywordListMatchType === 0 ? ' OR ' : ' AND ';
+    conditions.push(
+      `(${safeKeywordList.map(() => 'content LIKE ?').join(connector)})`
+    );
+    bindings.push(...safeKeywordList.map(keyword => `%${keyword}%`));
+  }
+  if (safeSenderUserIDList.length > 0) {
+    conditions.push(
+      `send_id IN (${placeholders(safeSenderUserIDList.length)})`
+    );
+    bindings.push(...safeSenderUserIDList);
+  }
+
+  return execPreparedQuery(
+    db,
+    `
+      SELECT * FROM 'chat_logs_${conversationID}'
+      WHERE ${conditions.join(' AND ')}
+      ORDER BY send_time DESC
+    `,
+    bindings
   );
 }
 
@@ -693,7 +712,6 @@ export function getLatestValidServerMessage(
   isReverse: boolean
 ): QueryExecResult[] {
   _initLocalChatLogsTable(db, conversationID);
-  const order = isReverse ? 'ASC' : 'DESC';
   return db.exec(
     `
       SELECT * FROM 'chat_logs_${conversationID}' WHERE send_time ${

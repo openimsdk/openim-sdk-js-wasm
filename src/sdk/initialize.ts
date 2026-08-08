@@ -5,6 +5,7 @@ let go: Go;
 let goExitPromise: Promise<void> | undefined;
 
 const CACHE_KEY = 'openim-wasm-cache';
+const UNEXPOSED_WASM_EXPORTS = ['markMessagesAsReadByMsgID'] as const;
 
 export async function initializeWasm(url: string): Promise<Go | null> {
   if (initialized) {
@@ -34,6 +35,9 @@ export async function initializeWasm(url: string): Promise<Go | null> {
   }
 
   await wait(100);
+  for (const exportName of UNEXPOSED_WASM_EXPORTS) {
+    Reflect.deleteProperty(window, exportName);
+  }
   initialized = true;
   return go;
 }

@@ -1,5 +1,6 @@
 import squel from 'squel';
 import { Database, QueryExecResult } from '@jlongster/sql.js';
+import { execPreparedQuery } from '@/utils';
 
 export type LocalFriend = { [key: string]: any };
 
@@ -104,30 +105,33 @@ export function searchFriendList(
   isSearchNickname: boolean,
   isSearchRemark: boolean
 ): QueryExecResult[] {
-  let totalConditionStr = '';
-  const userIDCondition = `friend_user_id like "%${keyword}%"`;
-  const nicknameCondition = `name like "%${keyword}%"`;
-  const remarkCondition = `remark like "%${keyword}%"`;
+  const conditions: string[] = [];
+  const bindings: string[] = [];
+  const keywordPattern = `%${keyword}%`;
   if (isSearchUserID) {
-    totalConditionStr = userIDCondition;
+    conditions.push('friend_user_id LIKE ?');
+    bindings.push(keywordPattern);
   }
   if (isSearchNickname) {
-    totalConditionStr = totalConditionStr
-      ? totalConditionStr + ' or ' + nicknameCondition
-      : nicknameCondition;
+    conditions.push('name LIKE ?');
+    bindings.push(keywordPattern);
   }
   if (isSearchRemark) {
-    totalConditionStr = totalConditionStr
-      ? totalConditionStr + ' or ' + remarkCondition
-      : remarkCondition;
+    conditions.push('remark LIKE ?');
+    bindings.push(keywordPattern);
   }
-  return db.exec(
+
+  const where =
+    conditions.length > 0 ? `WHERE (${conditions.join(' OR ')})` : '';
+  return execPreparedQuery(
+    db,
     `
-      select *
-        from local_friends
-        where ${totalConditionStr}
-        order by create_time desc
-        `
+      SELECT *
+      FROM local_friends
+      ${where}
+      ORDER BY create_time DESC
+    `,
+    bindings
   );
 }
 

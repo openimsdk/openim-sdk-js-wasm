@@ -55,7 +55,7 @@ export async function getMessage(
     if (execResult.length === 0) {
       return formatResponse(
         '',
-        DatabaseErrorCode.ErrorNoRecord,
+        DatabaseErrorCode.RecordNotFound,
         `no message with id ${clientMsgID}`
       );
     }
@@ -70,11 +70,7 @@ export async function getMessage(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -101,11 +97,7 @@ export async function getAlreadyExistSeqList(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -133,7 +125,7 @@ export async function getLatestValidServerMessage(
     if (!message) {
       return formatResponse(
         '',
-        DatabaseErrorCode.ErrorNoRecord,
+        DatabaseErrorCode.RecordNotFound,
         `no message with conversationID ${conversationID}`
       );
     }
@@ -142,11 +134,7 @@ export async function getLatestValidServerMessage(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -156,8 +144,10 @@ export async function getMessageList(
   startTime: number,
   startSeq: number,
   startClientMsgID: string,
-  isReverse = false
+  isReverse = false,
+  loginUserID = ''
 ): Promise<string> {
+  void loginUserID;
   if (startTime <= 0) {
     return getMessageListNoTime(conversationID, count, isReverse);
   }
@@ -184,11 +174,7 @@ export async function getMessageList(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -204,7 +190,7 @@ export async function getMessageBySeq(
     if (execResult.length === 0) {
       return formatResponse(
         '',
-        DatabaseErrorCode.ErrorNoRecord,
+        DatabaseErrorCode.RecordNotFound,
         `no message with seq ${seq}`
       );
     }
@@ -219,11 +205,7 @@ export async function getMessageBySeq(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -243,7 +225,7 @@ export async function getMessagesByClientMsgIDs(
     if (execResult.length === 0) {
       return formatResponse(
         '',
-        DatabaseErrorCode.ErrorNoRecord,
+        DatabaseErrorCode.RecordNotFound,
         `no message with clientMsgIDListStr ${clientMsgIDListStr}`
       );
     }
@@ -258,11 +240,7 @@ export async function getMessagesByClientMsgIDs(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -289,11 +267,7 @@ export async function getMessagesBySeqs(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -322,11 +296,7 @@ export async function getMessageListNoTime(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -344,11 +314,7 @@ export async function getConversationNormalMsgSeq(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -371,11 +337,7 @@ export async function getConversationPeerNormalMsgSeq(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -397,11 +359,7 @@ export async function getSendingMessageList(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -432,11 +390,7 @@ export async function updateMessageTimeAndStatus(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -466,11 +420,7 @@ export async function updateMessage(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -500,11 +450,7 @@ export async function updateMessageBySeq(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -528,11 +474,7 @@ export async function batchInsertMessageList(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -552,11 +494,7 @@ export async function insertMessage(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -583,11 +521,7 @@ export async function getMultipleMessage(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -626,11 +560,7 @@ export async function searchMessageByKeyword(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -665,11 +595,7 @@ export async function searchMessageByContentType(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -704,11 +630,7 @@ export async function searchMessageByContentTypeAndKeyword(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -725,11 +647,7 @@ export async function messageIfExists(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -754,11 +672,7 @@ export async function updateMsgSenderFaceURLAndSenderNickname(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -774,11 +688,7 @@ export async function deleteConversationAllMessages(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -794,11 +704,7 @@ export async function markDeleteConversationAllMessages(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -814,11 +720,7 @@ export async function cleanDuplicateInvalidMessages(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -845,11 +747,7 @@ export async function getUnreadMessage(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -872,11 +770,7 @@ export async function markConversationMessageAsReadBySeqs(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -899,11 +793,7 @@ export async function markConversationMessageAsRead(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -933,11 +823,7 @@ export async function updateColumnsMessage(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -958,11 +844,7 @@ export async function deleteConversationMsgs(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -979,11 +861,7 @@ export async function markConversationAllMessageAsRead(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -1012,11 +890,7 @@ export async function searchAllMessageByContentType(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -1043,10 +917,6 @@ export async function getLatestActiveMessage(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }

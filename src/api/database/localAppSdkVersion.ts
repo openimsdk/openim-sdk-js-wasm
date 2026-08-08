@@ -22,7 +22,7 @@ export async function getAppSDKVersion(): Promise<string> {
     if (execResult.length === 0) {
       return formatResponse(
         '',
-        DatabaseErrorCode.ErrorNoRecord,
+        DatabaseErrorCode.RecordNotFound,
         'no app version with database'
       );
     }
@@ -33,11 +33,7 @@ export async function getAppSDKVersion(): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -70,10 +66,6 @@ export async function setAppSDKVersion(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }

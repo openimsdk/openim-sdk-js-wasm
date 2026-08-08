@@ -1,10 +1,16 @@
 export const DatabaseErrorCode = {
+  InitializationFailed: 10001,
+  RecordNotFound: 10002,
+  OperationTimedOut: 10003,
+  /** @deprecated Use `InitializationFailed` instead. */
   ErrorInit: 10001,
+  /** @deprecated Use `RecordNotFound` instead. */
   ErrorNoRecord: 10002,
+  /** @deprecated Use `OperationTimedOut` instead. */
   ErrorDBTimeout: 10003,
 };
 
-export enum CbEvents {
+export enum SdkEvent {
   Login = 'Login',
   OnConnectFailed = 'OnConnectFailed',
   OnConnectSuccess = 'OnConnectSuccess',
@@ -17,11 +23,17 @@ export enum CbEvents {
   OnRecvNewMessage = 'OnRecvNewMessage',
   OnRecvNewMessages = 'OnRecvNewMessages',
   OnRecvOnlineOnlyMessage = 'OnRecvOnlineOnlyMessage',
-  OnRecvOfflineNewMessage = 'onRecvOfflineNewMessage',
+  OnRecvOfflineNewMessage = 'OnRecvOfflineNewMessage',
+  OnRecvOfflineNewMessages = 'OnRecvOfflineNewMessages',
+  /** @deprecated Use `OnRecvOnlineOnlyMessage` instead. */
   OnRecvOnlineOnlyMessages = 'OnRecvOnlineOnlyMessages',
-  OnRecvOfflineNewMessages = 'onRecvOfflineNewMessages',
   OnRecvMessageRevoked = 'OnRecvMessageRevoked',
   OnNewRecvMessageRevoked = 'OnNewRecvMessageRevoked',
+  OnRecvMessageModified = 'OnRecvMessageModified',
+  OnRecvMessageExtensionsChanged = 'OnRecvMessageExtensionsChanged',
+  OnRecvMessageExtensionsDeleted = 'OnRecvMessageExtensionsDeleted',
+  OnRecvMessageExtensionsAdded = 'OnRecvMessageExtensionsAdded',
+  OnMsgDeleted = 'OnMsgDeleted',
   OnRecvC2CReadReceipt = 'OnRecvC2CReadReceipt',
   OnRecvGroupReadReceipt = 'OnRecvGroupReadReceipt',
   OnConversationChanged = 'OnConversationChanged',
@@ -56,9 +68,12 @@ export enum CbEvents {
   UploadComplete = 'UploadComplete',
   OnRecvCustomBusinessMessage = 'OnRecvCustomBusinessMessage',
   OnUserStatusChanged = 'OnUserStatusChanged',
+  OnUserInputStatusChanged = 'OnUserInputStatusChanged',
+  OnUserCommandAdd = 'OnUserCommandAdd',
+  OnUserCommandDelete = 'OnUserCommandDelete',
+  OnUserCommandUpdate = 'OnUserCommandUpdate',
   OnUploadLogsProgress = 'OnUploadLogsProgress',
 
-  // rtc
   OnReceiveNewInvitation = 'OnReceiveNewInvitation',
   OnInviteeAccepted = 'OnInviteeAccepted',
   OnInviteeRejected = 'OnInviteeRejected',
@@ -67,13 +82,21 @@ export enum CbEvents {
   OnInvitationTimeout = 'OnInvitationTimeout',
   OnInviteeAcceptedByOtherDevice = 'OnInviteeAcceptedByOtherDevice',
   OnInviteeRejectedByOtherDevice = 'OnInviteeRejectedByOtherDevice',
-
-  // meeting
   OnStreamChange = 'OnStreamChange',
   OnRoomParticipantConnected = 'OnRoomParticipantConnected',
   OnRoomParticipantDisconnected = 'OnRoomParticipantDisconnected',
   OnReceiveCustomSignal = 'OnReceiveCustomSignal',
+  Open = 'Open',
+  PartSize = 'PartSize',
+  HashPartProgress = 'HashPartProgress',
+  HashPartComplete = 'HashPartComplete',
+  UploadID = 'UploadID',
+  UploadPartComplete = 'UploadPartComplete',
+  Complete = 'Complete',
 
   // unuse
   UnUsedEvent = 'UnUsedEvent',
 }
+
+/** @deprecated Use `SdkEvent` instead. */
+export import CbEvents = SdkEvent;

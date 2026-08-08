@@ -5,6 +5,7 @@ import { DatabaseErrorCode } from '@/constant';
 let rpc: RPC | undefined;
 let worker: Worker | undefined;
 let debug = false;
+const DATABASE_RPC_TIMEOUT_MS = 4500;
 
 function supportsModuleWorkers() {
   if (typeof Worker !== 'undefined' && 'type' in Worker.prototype) {
@@ -92,7 +93,7 @@ function catchErrorHandle(error: unknown) {
 
     return JSON.stringify({
       data: '',
-      errCode: DatabaseErrorCode.ErrorDBTimeout,
+      errCode: DatabaseErrorCode.OperationTimedOut,
       errMsg: 'database maybe damaged',
     });
   }
@@ -128,7 +129,9 @@ function registeMethodOnWindow(
           realName ?? name
         } method with args ${JSON.stringify(args)}`
       );
-      const response = await rpc.invoke(name, ...args, { timeout: 5000000 });
+      const response = await rpc.invoke(name, ...args, {
+        timeout: DATABASE_RPC_TIMEOUT_MS,
+      });
       _logWrap(
         `=> (invoked by go wasm) run ${realName ?? name} method with response `,
         JSON.stringify(response)
@@ -141,7 +144,7 @@ function registeMethodOnWindow(
       return JSON.stringify(response);
     } catch (error: unknown) {
       // defined in rpc-shooter
-      catchErrorHandle(error);
+      return catchErrorHandle(error);
     }
   };
 }
@@ -161,12 +164,13 @@ export function initDatabaseAPI(isLogStandardOutput = true): void {
   window.insertUpload = registeMethodOnWindow('insertUpload');
   window.updateUpload = registeMethodOnWindow('updateUpload');
   window.deleteUpload = registeMethodOnWindow('deleteUpload');
+  window.deleteExpireUpload = registeMethodOnWindow('deleteExpireUpload');
   window.fileMapSet = registeMethodOnWindow('fileMapSet');
   window.fileMapClear = registeMethodOnWindow('fileMapClear');
 
   window.setSqlWasmPath = registeMethodOnWindow('setSqlWasmPath');
   window.initDB = registeMethodOnWindow('initDB');
-  window.close = registeMethodOnWindow('close');
+  window.closeDB = registeMethodOnWindow('closeDB');
 
   // message
   window.getMessage = registeMethodOnWindow('getMessage');
@@ -339,7 +343,10 @@ export function initDatabaseAPI(isLogStandardOutput = true): void {
     'removeConversationDraft'
   );
   window.unPinConversation = registeMethodOnWindow('unPinConversation');
-  // window.updateAllConversation = registeMethodOnWindow('updateAllConversation');
+  window.updateAllConversation = registeMethodOnWindow('updateAllConversation');
+  window.updateOrCreateConversations = registeMethodOnWindow(
+    'updateOrCreateConversations'
+  );
   window.incrConversationUnreadCount = registeMethodOnWindow(
     'incrConversationUnreadCount'
   );

@@ -4,7 +4,7 @@ module.exports = {
   plugins: ['@typescript-eslint', 'node', 'prettier'],
   parserOptions: {
     tsconfigRootDir: __dirname,
-    project: ['./tsconfig.json'],
+    project: ['./tsconfig.json', './tests/e2e/tsconfig.json'],
   },
   extends: [
     'eslint:recommended',
@@ -36,4 +36,14 @@ module.exports = {
     '@typescript-eslint/no-misused-promises': 'off',
     'no-async-promise-executor': 'off',
   },
+  overrides: [
+    {
+      files: ['tests/e2e/**/*.ts'],
+      rules: {
+        '@typescript-eslint/no-unsafe-call': 'off',
+        '@typescript-eslint/no-unsafe-member-access': 'off',
+        '@typescript-eslint/require-await': 'off',
+      },
+    },
+  ],
 };

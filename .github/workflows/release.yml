@@ -6,9 +6,17 @@ on:
       - 'v*'
   workflow_dispatch:
     inputs:
-      version:
-        description: 'Version to release'
-        required: true
+      core_ref:
+        description: 'Optional Core tag, branch, or commit; defaults to assets/version'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wasm-release-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   release:
@@ -17,28 +25,100 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+
+      - name: Validate release tag
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: |
+          expected_tag="v$(node -p "require('./package.json').version")"
+          if [[ "${GITHUB_REF_NAME}" != "${expected_tag}" ]]; then
+            echo "Release tag ${GITHUB_REF_NAME} does not match package version ${expected_tag}." >&2
+            exit 1
+          fi
+
+      - name: Resolve matching SDK Core ref
+        id: core-ref
+        run: echo "ref=$(tr -d '[:space:]' < assets/version)" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout matching SDK Core
+        uses: actions/checkout@v4
+        with:
+          repository: OpenIMSDK/openim-sdk-core
+          ref: ${{ inputs.core_ref || steps.core-ref.outputs.ref }}
+          path: openim-sdk-core
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: npm
+          registry-url: https://registry.npmjs.org
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
+
+      - name: Verify Core, database, WASM and TypeScript contracts
+        env:
+          OPENIM_SDK_CORE_DIR: ${{ github.workspace }}/openim-sdk-core
+        run: npm run check
+
+      - name: Install E2E browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E contracts
+        env:
+          OPENIM_SDK_CORE_DIR: ${{ github.workspace }}/openim-sdk-core
+        run: npm run test:e2e
 
       - name: Build
         run: npm run build
 
-      - name: Authenticate with npm registry
-        run: npm config set //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}
+      - name: Verify packed package
+        run: npm run test:package
 
-      - name: Config npm
-        run: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Check whether the package version is already published
+        id: npm-package
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: |
+          package_name="$(node -p "require('./package.json').name")"
+          package_version="$(node -p "require('./package.json').version")"
+
+          if published_version="$(npm view "${package_name}@${package_version}" version 2>/dev/null)"; then
+            if [[ "${published_version}" != "${package_version}" ]]; then
+              echo "Registry returned unexpected version: ${published_version}" >&2
+              exit 1
+            fi
+            echo "published=true" >> "${GITHUB_OUTPUT}"
+            echo "${package_name}@${package_version} is already published; skipping duplicate publish."
+          else
+            echo "published=false" >> "${GITHUB_OUTPUT}"
+          fi
 
       - name: Publish
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && steps.npm-package.outputs.published != 'true'
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --access public --no-git-checks
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public --tag latest --no-git-checks
+
+      - name: Verify published package
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: |
+          package_name="$(node -p "require('./package.json').name")"
+          package_version="$(node -p "require('./package.json').version")"
+
+          for attempt in 1 2 3 4 5; do
+            published_version="$(npm view "${package_name}@${package_version}" version 2>/dev/null || true)"
+            if [[ "${published_version}" == "${package_version}" ]]; then
+              echo "Verified ${package_name}@${package_version} on npm."
+              exit 0
+            fi
+            if [[ "${attempt}" -lt 5 ]]; then
+              sleep 5
+            fi
+          done
+
+          echo "Could not verify ${package_name}@${package_version} on npm." >&2
+          exit 1

@@ -26,7 +26,7 @@ export async function getVersionSync(
     if (execResult.length === 0) {
       return formatResponse(
         '',
-        DatabaseErrorCode.ErrorNoRecord,
+        DatabaseErrorCode.RecordNotFound,
         `no sync version with tableName ${tableName}, entityID ${entityID}`
       );
     }
@@ -40,11 +40,7 @@ export async function getVersionSync(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -81,11 +77,7 @@ export async function setVersionSync(versionSyncStr: string): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -102,10 +94,6 @@ export async function deleteVersionSync(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }

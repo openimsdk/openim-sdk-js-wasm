@@ -21,11 +21,7 @@ export async function batchInsertTempCacheMessageList(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 

@@ -1,5 +1,6 @@
 import squel from 'squel';
 import { Database, QueryExecResult } from '@jlongster/sql.js';
+import { execPreparedQuery } from '@/utils';
 
 export type ClientConversation = { [key: string]: any };
 
@@ -155,6 +156,19 @@ export function updateColumnsConversation(
     .table('local_conversations')
     .setFields(conversation)
     .where(`conversation_id = '${conversationID}'`)
+    .toString();
+
+  return db.exec(sql);
+}
+
+export function updateAllConversation(
+  db: Database,
+  conversation: ClientConversation
+): QueryExecResult[] {
+  const sql = squel
+    .update()
+    .table('local_conversations')
+    .setFields(conversation)
     .toString();
 
   return db.exec(sql);
@@ -396,11 +410,13 @@ export function searchConversations(
   db: Database,
   keyword: string
 ): QueryExecResult[] {
-  return db.exec(
+  return execPreparedQuery(
+    db,
     `
-    SELECT * FROM local_conversations
-    WHERE show_name LIKE '%${keyword}%'
-    ORDER BY latest_msg_send_time DESC
-    `
+      SELECT * FROM local_conversations
+      WHERE show_name LIKE ?
+      ORDER BY latest_msg_send_time DESC
+    `,
+    [`%${keyword}%`]
   );
 }

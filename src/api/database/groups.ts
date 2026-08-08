@@ -35,11 +35,7 @@ export async function insertGroup(localGroupStr: string): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -53,11 +49,7 @@ export async function deleteGroup(groupID: string): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -78,11 +70,7 @@ export async function updateGroup(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -100,11 +88,7 @@ export async function getJoinedGroupList(): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -117,7 +101,7 @@ export async function getGroupInfoByGroupID(groupID: string): Promise<string> {
     if (execResult.length === 0) {
       return formatResponse(
         '',
-        DatabaseErrorCode.ErrorNoRecord,
+        DatabaseErrorCode.RecordNotFound,
         `no group with id ${groupID}`
       );
     }
@@ -130,11 +114,7 @@ export async function getGroupInfoByGroupID(groupID: string): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -161,11 +141,7 @@ export async function getAllGroupInfoByGroupIDOrGroupName(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -179,11 +155,7 @@ export async function subtractMemberCount(groupID: string): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -197,11 +169,7 @@ export async function addMemberCount(groupID: string): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -223,11 +191,7 @@ export async function getJoinedWorkingGroupIDList(): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -250,11 +214,7 @@ export async function getJoinedWorkingGroupList(): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -271,11 +231,7 @@ export async function getGroupMemberAllGroupIDs(): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -294,11 +250,7 @@ export async function getGroups(groupIDListStr: string): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -323,11 +275,7 @@ export async function batchInsertGroup(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -341,10 +289,6 @@ export async function deleteAllGroup(): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }

@@ -45,6 +45,14 @@ export async function getGroupMemberInfoByGroupIDUserID(
       userID
     );
 
+    if (execResult.length === 0) {
+      return formatResponse(
+        '',
+        DatabaseErrorCode.RecordNotFound,
+        `no group member with groupID ${groupID} and userID ${userID}`
+      );
+    }
+
     return formatResponse(
       converSqlExecResult(execResult[0], 'CamelCase', [], {
         user_group_face_url: 'faceURL',
@@ -53,11 +61,7 @@ export async function getGroupMemberInfoByGroupIDUserID(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -75,11 +79,7 @@ export async function getAllGroupMemberList(): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -93,11 +93,7 @@ export async function getAllGroupMemberUserIDList(): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -111,11 +107,7 @@ export async function getGroupMemberCount(groupID: string): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -140,11 +132,7 @@ export async function getGroupSomeMemberInfo(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -162,11 +150,7 @@ export async function getGroupAdminID(groupID: string): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -186,11 +170,7 @@ export async function getGroupMemberListByGroupID(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -198,8 +178,7 @@ export async function getGroupMemberListSplit(
   groupID: string,
   filter: number,
   offset: number,
-  count: number,
-  loginUserID: string
+  count: number
 ): Promise<string> {
   try {
     const db = await getInstance();
@@ -209,8 +188,7 @@ export async function getGroupMemberListSplit(
       groupID,
       filter,
       offset,
-      count,
-      loginUserID
+      count
     );
 
     return formatResponse(
@@ -221,11 +199,7 @@ export async function getGroupMemberListSplit(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -252,11 +226,7 @@ export async function getGroupMemberListByUserIDs(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -276,11 +246,7 @@ export async function getGroupMemberOwnerAndAdmin(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -298,11 +264,7 @@ export async function getGroupMemberOwner(groupID: string): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -335,11 +297,7 @@ export async function getGroupMemberListSplitByJoinTimeFilter(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -359,11 +317,7 @@ export async function getGroupOwnerAndAdminByGroupID(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -380,11 +334,7 @@ export async function getGroupMemberUIDListByGroupID(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -405,11 +355,7 @@ export async function insertGroupMember(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -434,11 +380,7 @@ export async function batchInsertGroupMember(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -455,11 +397,7 @@ export async function deleteGroupMember(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -473,11 +411,7 @@ export async function deleteGroupAllMembers(groupID: string): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -498,11 +432,7 @@ export async function updateGroupMember(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -525,11 +455,7 @@ export async function updateGroupMemberField(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -562,11 +488,7 @@ export async function searchGroupMembers(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -581,10 +503,6 @@ export async function getUserJoinedGroupIDs(userID: string): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }

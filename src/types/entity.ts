@@ -1,4 +1,4 @@
-import { CbEvents } from '../constant';
+import { SdkEvent } from '../constant';
 import {
   GroupType,
   SessionType,
@@ -10,33 +10,39 @@ import {
   AllowType,
   GroupJoinSource,
   GroupMemberRole,
-  MessageReceiveOptType,
-  GroupAtType,
+  MessageReceiveOption,
+  GroupMentionType,
   LogLevel,
   ApplicationHandleResult,
   Relationship,
   OnlineState,
   AddFriendPermission,
 } from './enum';
-export type WSEvent<T = unknown> = {
-  event: CbEvents;
+export type SdkEventEnvelope<T = unknown> = {
+  event: SdkEvent;
   data: T;
   errCode: number;
   errMsg: string;
   operationID: string;
 };
-export type WsResponse<T = string> = {
+export type SdkResponse<T = string> = {
   event: string;
   errCode: number;
   errMsg: string;
   data: T;
   operationID: string;
 };
-export type IMConfig = {
+export type WorkerResponse<T> = {
+  data: T;
+  errCode: number;
+  errMsg: string;
+};
+export type InitConfig = {
   platformID: Platform;
   apiAddr: string;
   wsAddr: string;
   dataDir: string;
+  systemType: string;
   logLevel: LogLevel;
   isLogStandardOutput: boolean;
   logFilePath: string;
@@ -47,21 +53,16 @@ export type MessageEntity = {
   offset: number;
   length: number;
   url?: string;
+  ex?: string;
+  /** @deprecated Use `ex` instead. */
   info?: string;
 };
-export type PicBaseInfo = {
-  uuid: string;
-  type: string;
-  size: number;
-  width: number;
-  height: number;
-  url: string;
-};
-export type AtUsersInfoItem = {
+export type AtUserInfo = {
   atUserID: string;
   groupNickname: string;
 };
 export type GroupApplicationItem = {
+  attachedInfo?: string;
   createTime: number;
   creatorUserID: string;
   ex: string;
@@ -74,6 +75,7 @@ export type GroupApplicationItem = {
   handledMsg: string;
   handledTime: number;
   introduction: string;
+  inviterUserID?: string;
   memberCount: number;
   nickname: string;
   notification: string;
@@ -86,6 +88,7 @@ export type GroupApplicationItem = {
   userID: string;
 };
 export type FriendApplicationItem = {
+  attachedInfo?: string;
   createTime: number;
   ex: string;
   fromFaceURL: string;
@@ -112,7 +115,7 @@ export type SelfUserInfo = {
   faceURL: string;
   nickname: string;
   userID: string;
-  globalRecvMsgOpt: MessageReceiveOptType;
+  globalRecvMsgOpt: MessageReceiveOption;
   addFriendPermission: AddFriendPermission;
 };
 export type PartialUserInfo = {
@@ -131,15 +134,16 @@ export type FriendUserItem = {
   isPinned: boolean;
   attachedInfo: string;
 };
-export type SearchedFriendsInfo = FriendUserItem & {
+export type SearchFriendsResultItem = FriendUserItem & {
   relationship: Relationship;
 };
-export type FriendshipInfo = {
+export type CheckFriendResultItem = {
   result: number;
   userID: string;
 };
 export type BlackUserItem = {
   addSource: number;
+  attachedInfo?: string;
   userID: string;
   createTime: number;
   ex: string;
@@ -149,6 +153,7 @@ export type BlackUserItem = {
   ownerUserID: string;
 };
 export type GroupItem = {
+  attachedInfo?: string;
   groupID: string;
   groupName: string;
   notification: string;
@@ -166,9 +171,11 @@ export type GroupItem = {
   ex: string;
   applyMemberFriend: AllowType;
   lookMemberInfo: AllowType;
-  displayIsRead: boolean;
+  /** @deprecated This field is retained only for patch.10 type compatibility. */
+  displayIsRead?: boolean;
 };
 export type GroupMemberItem = {
+  attachedInfo?: string;
   groupID: string;
   userID: string;
   nickname: string;
@@ -188,9 +195,9 @@ export type ConversationItem = {
   groupID: string;
   showName: string;
   faceURL: string;
-  recvMsgOpt: MessageReceiveOptType;
+  recvMsgOpt: MessageReceiveOption;
   unreadCount: number;
-  groupAtType: GroupAtType;
+  groupAtType: GroupMentionType;
   latestMsg: string;
   latestMsgSendTime: number;
   draftText: string;
@@ -201,30 +208,34 @@ export type ConversationItem = {
   isNotInGroup: boolean;
   isPrivateChat: boolean;
   isMsgDestruct: boolean;
+  updateUnreadCountTime?: number;
   attachedInfo: string;
   ex?: string;
+  maxSeq?: number;
+  minSeq?: number;
 };
 export type MessageItem = {
   clientMsgID: string;
-  serverMsgID: string;
+  serverMsgID?: string;
   createTime: number;
   sendTime: number;
   sessionType: SessionType;
-  sendID: string;
-  recvID: string;
+  sendID?: string;
+  recvID?: string;
   msgFrom: number;
   contentType: MessageType;
   senderPlatformID: Platform;
-  senderNickname: string;
-  senderFaceUrl: string;
-  groupID: string;
-  content: string;
+  senderNickname?: string;
+  senderFaceUrl?: string;
+  groupID?: string;
+  content?: string;
   seq: number;
   isRead: boolean;
   status: MessageStatus;
   isReact?: boolean;
   isExternalExtensions?: boolean;
   offlinePush?: OfflinePush;
+  attachedInfo?: string;
   ex?: string;
   localEx?: string;
   textElem?: TextElem;
@@ -242,7 +253,7 @@ export type MessageItem = {
   notificationElem?: NotificationElem;
   advancedTextElem?: AdvancedTextElem;
   typingElem?: TypingElem;
-  attachedInfoElem: AttachedInfoElem;
+  attachedInfoElem?: AttachedInfoElem;
 };
 export type TextElem = {
   content: string;
@@ -256,7 +267,7 @@ export type CardElem = {
 export type AtTextElem = {
   text: string;
   atUserList: string[];
-  atUsersInfo?: AtUsersInfoItem[];
+  atUsersInfo?: AtUserInfo[];
   quoteMessage?: MessageItem;
   isAtSelf?: boolean;
 };
@@ -311,23 +322,24 @@ export type PictureElem = {
   snapshotPicture: Picture;
 };
 export type AttachedInfoElem = {
-  groupHasReadInfo: GroupHasReadInfo;
+  groupHasReadInfo: GroupMessageReadSummary;
   isPrivateChat: boolean;
   isEncryption: boolean;
   inEncryptStatus: boolean;
   burnDuration: number;
   hasReadTime: number;
   messageEntityList?: MessageEntity[];
-  uploadProgress?: UploadProgress;
+  uploadProgress?: MessageUploadProgress;
 };
-export type UploadProgress = {
+export type MessageUploadProgress = {
   total: number;
   save: number;
   current: number;
+  uploadID?: string;
 };
-export type GroupHasReadInfo = {
+export type GroupMessageReadSummary = {
   hasReadCount: number;
-  unreadCount: number;
+  unreadCount?: number;
   hasReadUserIDList: string[];
   groupMemberCount: number;
 };
@@ -389,9 +401,10 @@ export type RevokedInfo = {
   sessionType: number;
   seq: number;
   ex: string;
+  isAdminRevoke?: boolean;
 };
 
-export type ReceiptInfo = {
+export type MessageReadReceipt = {
   userID: string;
   groupID: string;
   msgIDList: string[];
@@ -416,14 +429,14 @@ export type SearchMessageResultItem = {
   messageList: MessageItem[];
 };
 
-export type AdvancedGetMessageResult = {
+export type AdvancedMessageListResult = {
   isEnd: boolean;
   errCode: number;
   errMsg: string;
   messageList: MessageItem[];
 };
 
-export type RtcInvite = {
+export type SignalingInvitation = {
   inviterUserID: string;
   inviteeUserIDList: string[];
   customData?: string;
@@ -449,38 +462,122 @@ export type ConversationInputStatus = {
   platformIDs: Platform[];
 };
 
-export type GroupMessageReceiptInfo = {
+export type GroupMessageReadReceipt = {
   conversationID: string;
-  groupMessageReadInfo: GroupMessageReadInfo[];
+  groupMessageReadInfo: GroupMessageReadDetail[];
 };
-export type GroupMessageReadInfo = {
+export type GroupMessageReadDetail = {
   clientMsgID: string;
   hasReadCount: number;
   unreadCount: number;
   readMembers: GroupMemberItem[];
 };
 
-export type RtcInviteResults = {
+export type SignalingInviteResult = {
   liveURL: string;
   roomID: string;
   token: string;
   busyLineUserIDList?: string[];
 };
 
-export type ParticipantInfo = {
+export type SignalingParticipantInfo = {
   userInfo: PublicUserItem;
   groupMemberInfo?: GroupMemberItem;
   groupInfo?: GroupItem;
 };
 
-export type CallingRoomData = {
-  participant?: ParticipantInfo[];
-  invitation?: RtcInvite;
+export type SignalingRoomInfo = {
+  participant?: SignalingParticipantInfo[];
+  invitation?: SignalingInvitation;
   roomID: string;
 };
 
-export type UploadProgressData = {
+export type SignalingInvitationInfo = Required<SignalingInvitation>;
+export type SignalingOfflinePushInfo = OfflinePush & {
+  signalInfo: string;
+};
+export type SignalingInvitationEvent = {
+  invitation: SignalingInvitationInfo;
+  offlinePushInfo: SignalingOfflinePushInfo | null;
+  participant: SignalingParticipantInfo;
+  userID: string;
+};
+export type SignalingActionEvent = SignalingInvitationEvent & {
+  opUserPlatformID: Platform;
+};
+export type SignalingHungUpEvent = {
+  invitation: SignalingInvitationInfo;
+  offlinePushInfo: SignalingOfflinePushInfo | null;
+  userID: string;
+};
+export type SignalingStreamChangeEvent = {
+  roomID: string;
+  streamType: string;
+  mute: boolean;
+};
+export type SignalingRoomParticipantChangedEvent = {
+  invitation: SignalingInvitationInfo | null;
+  participant: SignalingParticipantInfo[] | null;
+  groupID: string;
+};
+export type SignalingCustomSignalEvent = {
+  roomID: string;
+  customInfo: string;
+};
+
+export type FileUploadProgress = {
   fileSize: number;
   streamSize: number;
+  storageSize: number;
   uuid: string;
+};
+
+// Compatibility names retained for applications upgrading from patch.10.
+/** @deprecated Use `SdkEventEnvelope` instead. */
+export type WSEvent<T = unknown> = SdkEventEnvelope<T>;
+/** @deprecated Use `SdkResponse` instead. */
+export type WsResponse<T = string> = SdkResponse<T>;
+/** @deprecated Use `InitConfig` instead. */
+export type IMConfig = Omit<InitConfig, 'systemType'> & {
+  systemType?: string;
+};
+/** @deprecated Use `Picture` instead. */
+export type PicBaseInfo = Picture;
+/** @deprecated Use `AtUserInfo` instead. */
+export type AtUsersInfoItem = AtUserInfo;
+/** @deprecated Use `SearchFriendsResultItem` instead. */
+export type SearchedFriendsInfo = SearchFriendsResultItem;
+/** @deprecated Use `CheckFriendResultItem` instead. */
+export type FriendshipInfo = CheckFriendResultItem;
+/** @deprecated Use `MessageUploadProgress` instead. */
+export type UploadProgress = MessageUploadProgress;
+/** @deprecated Use `GroupMessageReadSummary` instead. */
+export type GroupHasReadInfo = GroupMessageReadSummary;
+/** @deprecated Use `MessageReadReceipt` instead. */
+export type ReceiptInfo = MessageReadReceipt;
+/** @deprecated Use `AdvancedMessageListResult` instead. */
+export type AdvancedGetMessageResult = AdvancedMessageListResult;
+/** @deprecated Use `SignalingInvitation` instead. */
+export type RtcInvite = Omit<
+  SignalingInvitation,
+  'sessionType' | 'platformID'
+> & {
+  sessionType: number;
+  platformID: number;
+};
+/** @deprecated Use `GroupMessageReadReceipt` instead. */
+export type GroupMessageReceiptInfo = GroupMessageReadReceipt;
+/** @deprecated Use `GroupMessageReadDetail` instead. */
+export type GroupMessageReadInfo = GroupMessageReadDetail;
+/** @deprecated Use `SignalingInviteResult` instead. */
+export type RtcInviteResults = SignalingInviteResult;
+/** @deprecated Use `SignalingParticipantInfo` instead. */
+export type ParticipantInfo = SignalingParticipantInfo;
+/** @deprecated Use `SignalingRoomInfo` instead. */
+export type CallingRoomData = Omit<
+  SignalingRoomInfo,
+  'participant' | 'invitation'
+> & {
+  participant?: ParticipantInfo[];
+  invitation?: RtcInvite;
 };

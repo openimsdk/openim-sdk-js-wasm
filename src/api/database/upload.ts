@@ -5,6 +5,7 @@ import {
   insertUpload as databaseInsertUpload,
   updateUpload as databaseUpdateUpload,
   deleteUpload as databaseDeleteUpload,
+  deleteExpireUpload as databaseDeleteExpireUpload,
 } from '@/sqls';
 import {
   converSqlExecResult,
@@ -29,11 +30,7 @@ export async function getUpload(partHash: string): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -50,11 +47,7 @@ export async function insertUpload(uploadStr: string): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -71,11 +64,7 @@ export async function updateUpload(uploadStr: string): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -89,10 +78,19 @@ export async function deleteUpload(partHash: string): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
+  }
+}
+
+export async function deleteExpireUpload(): Promise<string> {
+  try {
+    const db = await getInstance();
+    const execResult = databaseDeleteExpireUpload(db);
+
+    return formatResponse(execResult);
+  } catch (e) {
+    console.error(e);
+
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }

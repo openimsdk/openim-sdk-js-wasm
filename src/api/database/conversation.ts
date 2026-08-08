@@ -11,6 +11,7 @@ import {
   findAllUnreadConversationConversationID as databaseFindAllUnreadConversationConversationID,
   getAllConversationIDList as databaseGetAllConversationIDList,
   updateColumnsConversation as databaseUpdateColumnsConversation,
+  updateAllConversation as databaseUpdateAllConversation,
   getTotalUnreadMsgCount as databaseGetTotalUnreadMsgCount,
   getMultipleConversation as databaseGetMultipleConversation,
   getConversationByUserID as databaseGetConversationByUserID,
@@ -55,11 +56,7 @@ export async function getAllConversationList(): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -80,11 +77,7 @@ export async function getAllConversationListToSync(): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -102,11 +95,7 @@ export async function findAllUnreadConversationConversationID(): Promise<string>
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -124,11 +113,7 @@ export async function getAllSingleConversationIDList(): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -146,11 +131,7 @@ export async function getAllConversationIDList(): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -171,11 +152,7 @@ export async function getHiddenConversationList(): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -188,7 +165,7 @@ export async function getConversation(conversationID: string): Promise<string> {
     if (execResult.length === 0) {
       return formatResponse(
         '',
-        DatabaseErrorCode.ErrorNoRecord,
+        DatabaseErrorCode.RecordNotFound,
         `no conversation with id ${conversationID}`
       );
     }
@@ -204,11 +181,7 @@ export async function getConversation(conversationID: string): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -232,11 +205,7 @@ export async function getMultipleConversation(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -268,11 +237,7 @@ export async function updateColumnsConversation(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -293,11 +258,7 @@ export async function decrConversationUnreadCount(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -323,11 +284,7 @@ export async function batchInsertConversationList(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -347,11 +304,7 @@ export async function getTotalUnreadMsgCount(): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -364,7 +317,7 @@ export async function getConversationByUserID(userID: string): Promise<string> {
     if (execResult.length === 0) {
       return formatResponse(
         '',
-        DatabaseErrorCode.ErrorNoRecord,
+        DatabaseErrorCode.RecordNotFound,
         `no conversation with userID ${userID}`
       );
     }
@@ -380,11 +333,7 @@ export async function getConversationByUserID(userID: string): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -408,11 +357,7 @@ export async function getConversationListSplit(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -428,11 +373,7 @@ export async function deleteConversation(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -446,11 +387,7 @@ export async function deleteAllConversation(): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -470,11 +407,7 @@ export async function updateConversation(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -499,11 +432,7 @@ export async function batchUpdateConversationList(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -518,11 +447,7 @@ export async function conversationIfExists(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -537,11 +462,7 @@ export async function resetConversation(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -554,11 +475,7 @@ export async function resetAllConversation(): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -573,11 +490,7 @@ export async function clearConversation(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -590,11 +503,7 @@ export async function clearAllConversation(): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -610,11 +519,7 @@ export async function setConversationDraft(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -630,11 +535,7 @@ export async function removeConversationDraft(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -650,49 +551,115 @@ export async function unPinConversation(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
-// export async function updateAllConversation(
-//   conversationID: string,
-//   conversation: ClientConversation | string
-// ): Promise<string> {
-//   try {
-//     const db = await getInstance();
-//     let parsedConversation = conversation as ClientConversation;
-//     if (typeof conversation === 'string') {
-//       parsedConversation = convertToSnakeCaseObject(
-//         convertObjectField(JSON.parse(conversation))
-//       ) as ClientConversation;
-//     }
+export async function updateAllConversation(
+  conversationStr: string
+): Promise<string> {
+  try {
+    const db = await getInstance();
+    const parsedConversation = convertToSnakeCaseObject(
+      convertObjectField(JSON.parse(conversationStr))
+    ) as ClientConversation;
 
-//     const execResult = databaseUpdateColumnsConversation(
-//       db,
-//       conversationID,
-//       parsedConversation
-//     );
-//     const modifed = db.getRowsModified();
+    if (parsedConversation.conversation_id) {
+      throw new Error('updateAllConversation requires an empty conversationID');
+    }
 
-//     if (modifed === 0) {
-//       throw 'updateColumnsConversation no record updated';
-//     }
+    const nonZeroFields = Object.entries(parsedConversation).reduce(
+      (fields, [key, value]) => {
+        if (
+          key !== 'conversation_id' &&
+          value !== undefined &&
+          value !== null &&
+          value !== '' &&
+          value !== 0 &&
+          value !== false
+        ) {
+          fields[key] = value;
+        }
+        return fields;
+      },
+      {} as ClientConversation
+    );
 
-//     return formatResponse(execResult);
-//   } catch (e) {
-//     console.error(e);
+    if (Object.keys(nonZeroFields).length === 0) {
+      throw new Error('updateAllConversation has no non-zero fields');
+    }
 
-//     return formatResponse(
-//       undefined,
-//       DatabaseErrorCode.ErrorInit,
-//       JSON.stringify(e)
-//     );
-//   }
-// }
+    const execResult = databaseUpdateAllConversation(db, nonZeroFields);
+    if (db.getRowsModified() === 0) {
+      throw new Error('updateAllConversation updated no records');
+    }
+
+    return formatResponse(execResult);
+  } catch (e) {
+    console.error(e);
+
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
+  }
+}
+
+export async function updateOrCreateConversations(
+  conversationListStr: string
+): Promise<string> {
+  try {
+    const db = await getInstance();
+    const conversationList = (
+      (JSON.parse(conversationListStr) || []) as ClientConversation[]
+    ).map(
+      conversation =>
+        convertToSnakeCaseObject(
+          convertObjectField(conversation)
+        ) as ClientConversation
+    );
+
+    if (conversationList.length === 0) {
+      return formatResponse('');
+    }
+
+    const queryResult = databaseGetAllConversationIDList(db);
+    const existingIDs = new Set(
+      queryResult.length === 0
+        ? []
+        : converSqlExecResult(queryResult[0], 'CamelCase').map(
+            item => item.conversationID as string
+          )
+    );
+    const conversationsToInsert = conversationList.filter(
+      conversation => !existingIDs.has(conversation.conversation_id as string)
+    );
+    const conversationsToUpdate = conversationList.filter(conversation =>
+      existingIDs.has(conversation.conversation_id as string)
+    );
+
+    db.exec('BEGIN');
+    try {
+      if (conversationsToInsert.length > 0) {
+        databaseBatchInsertConversationList(db, conversationsToInsert);
+      }
+      conversationsToUpdate.forEach(conversation => {
+        databaseUpdateColumnsConversation(
+          db,
+          conversation.conversation_id as string,
+          { unread_count: conversation.unread_count }
+        );
+      });
+      db.exec('COMMIT');
+    } catch (e) {
+      db.exec('ROLLBACK');
+      throw e;
+    }
+
+    return formatResponse('');
+  } catch (e) {
+    console.error(e);
+
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
+  }
+}
 
 export async function incrConversationUnreadCount(
   conversationID: string
@@ -705,11 +672,7 @@ export async function incrConversationUnreadCount(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -729,11 +692,7 @@ export async function setMultipleConversationRecvMsgOpt(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -754,11 +713,7 @@ export async function getAllConversations(): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -779,10 +734,6 @@ export async function searchConversations(keyword: string): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }

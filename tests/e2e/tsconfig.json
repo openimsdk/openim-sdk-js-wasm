@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": false,
+    "declaration": false,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "commonjs",
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "target": "ES2020",
+    "types": ["node", "@playwright/test"]
+  },
+  "include": ["./**/*.ts", "./playwright.config.ts"]
+}

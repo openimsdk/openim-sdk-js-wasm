@@ -1,5 +1,6 @@
 import squel from 'squel';
 import { Database, QueryExecResult } from '@jlongster/sql.js';
+import { execPreparedQuery } from '@/utils';
 
 export type LocalGroup = { [key: string]: any };
 
@@ -96,25 +97,25 @@ export function getAllGroupInfoByGroupIDOrGroupName(
   isSearchGroupID: boolean,
   isSearchGroupName: boolean
 ): QueryExecResult[] {
-  let totalConditionStr = '';
-  const groupIDCondition = `group_id like "%${keyword}%"`;
-  const groupNameCondition = `name like "%${keyword}%"`;
-  if (isSearchGroupID) {
-    totalConditionStr = groupIDCondition;
+  const keywordPattern = `%${keyword}%`;
+  let condition = 'name LIKE ?';
+  let bindings = [keywordPattern];
+  if (isSearchGroupID && isSearchGroupName) {
+    condition = '(group_id LIKE ? OR name LIKE ?)';
+    bindings = [keywordPattern, keywordPattern];
+  } else if (isSearchGroupID) {
+    condition = 'group_id LIKE ?';
   }
-  if (isSearchGroupName) {
-    totalConditionStr = groupNameCondition;
-  }
-  if (isSearchGroupName && isSearchGroupID) {
-    totalConditionStr = groupIDCondition + ' or ' + groupNameCondition;
-  }
-  return db.exec(
+
+  return execPreparedQuery(
+    db,
     `
-    select *
-    from local_groups
-    where ${totalConditionStr}
-    order by create_time desc
-    `
+      SELECT *
+      FROM local_groups
+      WHERE ${condition}
+      ORDER BY create_time DESC
+    `,
+    bindings
   );
 }
 

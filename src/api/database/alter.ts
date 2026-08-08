@@ -5,6 +5,7 @@ export function alterTable(db: Database) {
   alter380(db);
   alter381(db);
   alter383p8(db);
+  alter383p15(db);
 }
 
 function alter351(db: Database) {
@@ -52,5 +53,40 @@ function alter383p8(db: Database) {
     );
   } catch (error) {
     // alter table error
+  }
+}
+
+function alter383p15(db: Database) {
+  try {
+    db.exec(
+      `
+        ALTER TABLE local_conversations
+        ADD COLUMN msg_destruct_time integer default 604800;
+        `
+    );
+  } catch (error) {
+    // Column already exists.
+  }
+
+  try {
+    db.exec(
+      `
+        ALTER TABLE local_conversations
+        ADD COLUMN is_msg_destruct numeric default false;
+        `
+    );
+  } catch (error) {
+    // Column already exists.
+  }
+
+  try {
+    db.exec(
+      `
+        ALTER TABLE temp_cache_local_chat_logs
+        ADD COLUMN local_ex varchar(1024);
+        `
+    );
+  } catch (error) {
+    // Column already exists or the legacy cache table is absent.
   }
 }

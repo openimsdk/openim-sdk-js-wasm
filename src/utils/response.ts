@@ -1,7 +1,7 @@
 export function formatResponse(
   data: unknown,
   errCode?: number,
-  errMsg?: string
+  errMsg?: unknown
 ): any {
   let serializedData = data;
   if (typeof data === 'object') {
@@ -11,6 +11,21 @@ export function formatResponse(
   return {
     data: data !== undefined ? serializedData : '{}',
     errCode: errCode || 0,
-    errMsg: errMsg || '',
+    errMsg: errMsg === undefined ? '' : formatError(errMsg),
   };
+}
+
+export function formatError(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (typeof error === 'string') {
+    return error;
+  }
+  try {
+    const serialized = JSON.stringify(error);
+    return serialized === undefined ? String(error) : serialized;
+  } catch {
+    return String(error);
+  }
 }

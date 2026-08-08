@@ -1,161 +1,134 @@
+import type {} from '@/types';
 import { initDatabaseAPI, workerPromise } from '@/api';
 import Emitter from '@/utils/emitter';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidV4 } from 'uuid';
 import { getGO, initializeWasm, getGoExitPromise } from './initialize';
 
 import {
-  AccessFriendApplicationParams,
-  AccessGroupApplicationParams,
-  AccessMessageParams,
+  HandleFriendApplicationParams,
+  HandleGroupApplicationParams,
+  ConversationMessageParams,
   AddFriendParams,
-  AdvancedMsgParams,
-  AdvancedQuoteMsgParams,
-  AtMsgParams,
+  CreateAdvancedTextMessageParams,
+  CreateAdvancedQuoteMessageParams,
+  CreateTextAtMessageParams,
   ChangeGroupMemberMuteParams,
   ChangeGroupMuteParams,
   CreateGroupParams,
-  CustomMsgParams,
-  CustomSignalParams,
-  FaceMessageParams,
-  FileMsgParamsByURL,
-  FindMessageParams,
-  GetAdvancedHistoryMsgParams,
-  GetGroupMemberByTimeParams,
-  GetGroupMemberParams,
-  GetGroupMessageReaderParams,
-  GetHistoryMsgParams,
-  GetOneConversationParams,
-  ImageMsgParamsByURL,
-  InitAndLoginConfig,
-  InsertGroupMsgParams,
-  InsertSingleMsgParams,
-  AccessToGroupParams,
-  SetConversationRecvOptParams,
+  CreateCustomMessageParams,
+  CreateFaceMessageParams,
+  CreateFileMessageByURLParams,
+  FindMessageQuery,
+  GetAdvancedHistoryMessageListParams,
+  GetGroupMemberListByJoinTimeFilterParams,
+  GetGroupMemberListParams,
+  ConversationSessionParams,
+  CreateImageMessageByURLParams,
+  LoginParams,
+  InsertGroupMessageToLocalStorageParams,
+  InsertSingleMessageToLocalStorageParams,
+  GroupMemberOperationParams,
+  GroupMemberUserListParams,
   JoinGroupParams,
-  LocationMsgParams,
-  UpdateMemberInfoParams,
-  MergerMsgParams,
-  PartialUserItem,
-  SetConversationPinParams,
-  QuoteMsgParams,
-  RemarkFriendParams,
-  RtcActionParams,
-  SearchFriendParams,
-  SearchGroupMemberParams,
-  SearchGroupParams,
-  SearchLocalParams,
-  SendGroupReadReceiptParams,
-  SendMsgParams,
-  SetBurnDurationParams,
-  SetConversationMsgDestructParams,
-  SetConversationMsgDestructTimeParams,
+  CreateLocationMessageParams,
+  SetGroupMemberInfoParams,
+  CreateMergerMessageParams,
+  SetSelfInfoParams,
+  CreateQuoteMessageParams,
+  SearchFriendsParams,
+  SearchGroupMembersParams,
+  SearchGroupsParams,
+  SearchLocalMessagesParams,
+  SendMessageParams,
   SetConversationDraftParams,
-  SetGroupRoleParams,
-  SetGroupVerificationParams,
-  SetMemberPermissionParams,
   SetMessageLocalExParams,
-  SetConversationPrivateStateParams,
-  SignalingInviteParams,
-  SoundMsgParamsByURL,
-  SplitConversationParams,
-  TransferGroupParams,
-  TypingUpdateParams,
+  CreateSoundMessageByURLParams,
+  ConversationListPaginationParams,
+  TransferGroupOwnerParams,
   UploadFileParams,
-  VideoMsgParamsByURL,
-  SetGroupMemberNickParams,
+  CreateVideoMessageByURLParams,
   WasmPathConfig,
-  PinFriendParams,
-  SetFriendExParams,
-  SetConversationExParams,
   AddBlackParams,
-  OffsetParams,
+  PaginationParams,
   UpdateFriendsParams,
   SetConversationParams,
   GetSpecifiedFriendsParams,
   ChangeInputStatesParams,
-  GetInputstatesParams,
-  FetchSurroundingParams,
+  GetInputStatesParams,
   GetFriendApplicationListAsRecipientParams,
-  GetFriendApplicationListAsApplicationParams,
-  GetSelfUnhandledApplyCountParams,
-  GetGroupApplicationListParams,
+  GetFriendApplicationListAsApplicantParams,
+  ApplicationUnhandledCountParams,
+  GroupApplicationListParams,
 } from '../types/params';
 
 import {
-  AdvancedGetMessageResult,
+  AdvancedMessageListResult,
   BlackUserItem,
-  CallingRoomData,
   CardElem,
   ConversationItem,
   FriendApplicationItem,
-  FriendshipInfo,
+  CheckFriendResultItem,
   FriendUserItem,
   GroupApplicationItem,
   GroupItem,
   GroupMemberItem,
-  IMConfig,
+  InitConfig,
   MessageItem,
-  OfflinePush,
   PublicUserItem,
-  RtcInvite,
-  RtcInviteResults,
-  SearchedFriendsInfo,
+  SearchFriendsResultItem,
   SearchMessageResult,
   SelfUserInfo,
   UserOnlineState,
-  WSEvent,
-  WsResponse,
+  SdkEventEnvelope,
+  SdkResponse,
+  WorkerResponse,
 } from '../types/entity';
-import {
-  GroupAtType,
-  LoginStatus,
-  MessageReceiveOptType,
-  Platform,
-} from '@/types/enum';
+import { LoginStatus, Platform } from '@/types/enum';
 import { logBoxStyleValue } from '@/utils';
-class SDK extends Emitter {
-  private wasmInitializedPromise: Promise<any>;
-  private goExitPromise: Promise<void> | undefined;
-  private goExisted = false;
-  private tryParse = true;
-  private isLogStandardOutput = true;
+
+class WasmSdk extends Emitter {
+  private wasmInitializationPromise: Promise<Go | null>;
+  private goRuntimeExitPromise: Promise<void> | undefined;
+  private goExited = false;
+  private parseResponses = true;
+  private logToConsole = true;
 
   constructor(url = '/openIM.wasm', debug = true) {
     super();
 
     initDatabaseAPI(debug);
-    this.isLogStandardOutput = debug;
-    this.wasmInitializedPromise = initializeWasm(url);
-    this.goExitPromise = getGoExitPromise();
+    this.logToConsole = debug;
+    this.wasmInitializationPromise = initializeWasm(url);
+    this.goRuntimeExitPromise = getGoExitPromise();
 
-    if (this.goExitPromise) {
-      this.goExitPromise
+    if (this.goRuntimeExitPromise) {
+      this.goRuntimeExitPromise
         .then(() => {
-          this._logWrap('SDK => wasm exist');
+          this.logSdk('SDK => wasm exist');
         })
         .catch(err => {
-          this._logWrap('SDK => wasm with error ', err);
+          this.logSdk('SDK => wasm with error ', err);
         })
         .finally(() => {
-          this.goExisted = true;
+          this.goExited = true;
         });
     }
   }
 
-  _logWrap(...args: any[]) {
-    if (this.isLogStandardOutput) {
+  private logSdk(...args: any[]) {
+    if (this.logToConsole) {
       console.info(...args);
     }
   }
 
-  _invoker<T>(
+  private invokeCore<T>(
     functionName: string,
     func: (...args: any[]) => Promise<any>,
     args: any[],
     processor?: (data: string) => string
-  ): Promise<WsResponse<T>> {
+  ): Promise<SdkResponse<T>> {
     return new Promise(async (resolve, reject) => {
-      this._logWrap(
+      this.logSdk(
         `%cSDK =>%c [OperationID:${
           args[0]
         }] (invoked by js) run ${functionName} with args ${JSON.stringify(
@@ -169,15 +142,17 @@ class SDK extends Emitter {
         operationID: args[0],
         event: (functionName.slice(0, 1).toUpperCase() +
           functionName.slice(1).toLowerCase()) as any,
-      } as WsResponse<T>;
+        errCode: 0,
+        errMsg: '',
+      } as SdkResponse<T>;
       try {
-        if (!getGO() || getGO().exited || this.goExisted) {
+        if (!getGO() || getGO().exited || this.goExited) {
           throw 'wasm exist already, fail to run';
         }
 
         let data = await func(...args);
         if (processor) {
-          this._logWrap(
+          this.logSdk(
             `%cSDK =>%c [OperationID:${
               args[0]
             }] (invoked by js) run ${functionName} with response before processor ${JSON.stringify(
@@ -189,7 +164,7 @@ class SDK extends Emitter {
           data = processor(data);
         }
 
-        if (this.tryParse) {
+        if (this.parseResponses) {
           try {
             data = JSON.parse(data);
           } catch (error) {
@@ -199,7 +174,7 @@ class SDK extends Emitter {
         response.data = data;
         resolve(response);
       } catch (error) {
-        this._logWrap(
+        this.logSdk(
           `%cSDK =>%c [OperationID:${
             args[0]
           }] (invoked by js) run ${functionName} with error ${JSON.stringify(
@@ -210,14 +185,18 @@ class SDK extends Emitter {
         );
         response = {
           ...response,
-          ...(error as WsResponse<T>),
+          ...(error as SdkResponse<T>),
         };
         reject(response);
       }
     });
   }
-  login = async (params: InitAndLoginConfig, operationID = uuidv4()) => {
-    this._logWrap(
+
+  login = async (
+    params: LoginParams,
+    operationID = uuidV4()
+  ): Promise<string> => {
+    this.logSdk(
       `SDK => (invoked by js) run login with args ${JSON.stringify({
         params,
         operationID,
@@ -225,18 +204,18 @@ class SDK extends Emitter {
     );
 
     await workerPromise;
-    await this.wasmInitializedPromise;
+    await this.wasmInitializationPromise;
     window.commonEventFunc(event => {
       try {
-        this._logWrap(
+        this.logSdk(
           `%cSDK =>%c received event %c${event}%c `,
           logBoxStyleValue('#282828', '#ffffff'),
           '',
           'color: #4f2398;',
           ''
         );
-        const parsed = JSON.parse(event) as WSEvent;
-        if (this.tryParse) {
+        const parsed = JSON.parse(event) as SdkEventEnvelope;
+        if (this.parseResponses) {
           try {
             parsed.data = JSON.parse(parsed.data as string);
           } catch (error) {
@@ -250,153 +229,138 @@ class SDK extends Emitter {
       }
     });
 
-    const config: IMConfig = {
+    const config: InitConfig = {
       platformID: params.platformID,
       apiAddr: params.apiAddr,
       wsAddr: params.wsAddr,
       dataDir: './',
+      systemType: 'web',
       logLevel: params.logLevel || 5,
-      isLogStandardOutput:
-        params.isLogStandardOutput ?? this.isLogStandardOutput,
+      isLogStandardOutput: params.isLogStandardOutput ?? this.logToConsole,
       logFilePath: './',
       isExternalExtensions: params.isExternalExtensions || false,
     };
-    this.tryParse = params.tryParse ?? true;
+    this.parseResponses = params.tryParse ?? true;
     window.initSDK(operationID, JSON.stringify(config));
     return await window.login(operationID, params.userID, params.token);
   };
-  logout = <T>(operationID = uuidv4()) => {
+  logout = (operationID = uuidV4()) => {
     window.fileMapClear();
-    return this._invoker<T>('logout', window.logout, [operationID]);
+    return this.invokeCore<void>('logout', window.logout, [operationID]);
   };
-  getAllConversationList = (operationID = uuidv4()) => {
-    return this._invoker<ConversationItem[]>(
+  getAllConversationList = (operationID = uuidV4()) => {
+    return this.invokeCore<ConversationItem[]>(
       'getAllConversationList',
       window.getAllConversationList,
       [operationID]
     );
   };
   getOneConversation = (
-    params: GetOneConversationParams,
-    operationID = uuidv4()
+    params: ConversationSessionParams,
+    operationID = uuidV4()
   ) => {
-    return this._invoker<ConversationItem>(
+    return this.invokeCore<ConversationItem>(
       'getOneConversation',
       window.getOneConversation,
       [operationID, params.sessionType, params.sourceID]
     );
   };
   getAdvancedHistoryMessageList = (
-    params: GetAdvancedHistoryMsgParams,
-    operationID = uuidv4()
+    params: GetAdvancedHistoryMessageListParams,
+    operationID = uuidV4()
   ) => {
-    return this._invoker<AdvancedGetMessageResult>(
+    return this.invokeCore<AdvancedMessageListResult>(
       'getAdvancedHistoryMessageList',
       window.getAdvancedHistoryMessageList,
       [operationID, JSON.stringify(params)]
     );
   };
   getAdvancedHistoryMessageListReverse = (
-    params: GetAdvancedHistoryMsgParams,
-    operationID = uuidv4()
+    params: GetAdvancedHistoryMessageListParams,
+    operationID = uuidV4()
   ) => {
-    return this._invoker<AdvancedGetMessageResult>(
+    return this.invokeCore<AdvancedMessageListResult>(
       'getAdvancedHistoryMessageListReverse',
       window.getAdvancedHistoryMessageListReverse,
       [operationID, JSON.stringify(params)]
     );
   };
-  fetchSurroundingMessages = (
-    params: FetchSurroundingParams,
-    operationID = uuidv4()
-  ) => {
-    return this._invoker<{ messageList: MessageItem[] }>(
-      'fetchSurroundingMessages',
-      window.fetchSurroundingMessages,
-      [operationID, JSON.stringify(params)]
-    );
-  };
-  getSpecifiedGroupsInfo = (params: string[], operationID = uuidv4()) => {
-    return this._invoker<GroupItem[]>(
+  getSpecifiedGroupsInfo = (params: string[], operationID = uuidV4()) => {
+    return this.invokeCore<GroupItem[]>(
       'getSpecifiedGroupsInfo',
       window.getSpecifiedGroupsInfo,
       [operationID, JSON.stringify(params)]
     );
   };
-  deleteConversationAndDeleteAllMsg = <T>(
+  deleteConversationAndDeleteAllMsg = (
     conversationID: string,
-    operationID = uuidv4()
+    operationID = uuidV4()
   ) => {
-    return this._invoker<T>(
+    return this.invokeCore<void>(
       'deleteConversationAndDeleteAllMsg',
       window.deleteConversationAndDeleteAllMsg,
       [operationID, conversationID]
     );
   };
-  markConversationMessageAsRead = <T>(data: string, operationID = uuidv4()) => {
-    return this._invoker<T>(
+  markConversationMessageAsRead = (data: string, operationID = uuidV4()) => {
+    return this.invokeCore<void>(
       'markConversationMessageAsRead',
       window.markConversationMessageAsRead,
       [operationID, data]
     );
   };
-  sendGroupMessageReadReceipt = <T>(
-    params: SendGroupReadReceiptParams,
-    operationID = uuidv4()
-  ) => {
-    return this._invoker<T>(
-      'sendGroupMessageReadReceipt',
-      window.sendGroupMessageReadReceipt,
-      [
-        operationID,
-        params.conversationID,
-        JSON.stringify(params.clientMsgIDList),
-      ]
-    );
-  };
-  getGroupMessageReaderList = (
-    params: GetGroupMessageReaderParams,
-    operationID = uuidv4()
-  ) => {
-    return this._invoker<GroupMemberItem[]>(
-      'getGroupMessageReaderList',
-      window.getGroupMessageReaderList,
-      [
-        operationID,
-        params.conversationID,
-        params.clientMsgID,
-        params.filter,
-        params.offset,
-        params.count,
-      ]
+  markAllConversationMessageAsRead = (operationID = uuidV4()) => {
+    return this.invokeCore<void>(
+      'markAllConversationMessageAsRead',
+      window.markAllConversationMessageAsRead,
+      [operationID]
     );
   };
   getGroupMemberList = (
-    params: GetGroupMemberParams,
-    operationID = uuidv4()
+    params: GetGroupMemberListParams,
+    operationID = uuidV4()
   ) => {
-    return this._invoker<GroupMemberItem[]>(
+    return this.invokeCore<GroupMemberItem[]>(
       'getGroupMemberList',
       window.getGroupMemberList,
       [operationID, params.groupID, params.filter, params.offset, params.count]
     );
   };
-  createTextMessage = (text: string, operationID = uuidv4()) => {
-    return this._invoker<MessageItem>(
+  createTextMessage = (text: string, operationID = uuidV4()) => {
+    return this.invokeCore<MessageItem>(
       'createTextMessage',
       window.createTextMessage,
       [operationID, text],
       data => {
-        // compitable with old version sdk
+        // Go synchronous factory methods return a single-item tuple.
         return data[0];
       }
     );
   };
-  createImageMessageByURL = (
-    params: ImageMsgParamsByURL,
-    operationID = uuidv4()
+  createImageMessage = (imagePath: string, operationID = uuidV4()) => {
+    return this.invokeCore<MessageItem | ''>(
+      'createImageMessage',
+      window.createImageMessage,
+      [operationID, imagePath],
+      data => data[0]
+    );
+  };
+  createImageMessageFromFullPath = (
+    imageFullPath: string,
+    operationID = uuidV4()
   ) => {
-    return this._invoker<MessageItem>(
+    return this.invokeCore<MessageItem | ''>(
+      'createImageMessageFromFullPath',
+      window.createImageMessageFromFullPath,
+      [operationID, imageFullPath],
+      data => data[0]
+    );
+  };
+  createImageMessageByURL = (
+    params: CreateImageMessageByURLParams,
+    operationID = uuidV4()
+  ) => {
+    return this.invokeCore<MessageItem>(
       'createImageMessageByURL',
       window.createImageMessageByURL,
       [
@@ -407,18 +371,18 @@ class SDK extends Emitter {
         JSON.stringify(params.snapshotPicture),
       ],
       data => {
-        // compitable with old version sdk
+        // Go synchronous factory methods return a single-item tuple.
         return data[0];
       }
     );
   };
   createImageMessageByFile = (
-    params: ImageMsgParamsByURL & { file: File },
-    operationID = uuidv4()
+    params: CreateImageMessageByURLParams & { file: File },
+    operationID = uuidV4()
   ) => {
     params.sourcePicture.uuid = `${params.sourcePicture.uuid}/${params.file.name}`;
     window.fileMapSet(params.sourcePicture.uuid, params.file);
-    return this._invoker<MessageItem>(
+    return this.invokeCore<MessageItem>(
       'createImageMessageByFile',
       window.createImageMessageByURL,
       [
@@ -429,38 +393,44 @@ class SDK extends Emitter {
         JSON.stringify(params.snapshotPicture),
       ],
       data => {
-        // compitable with old version sdk
+        // Go synchronous factory methods return a single-item tuple.
         return data[0];
       }
     );
   };
-  createCustomMessage = (params: CustomMsgParams, operationID = uuidv4()) => {
-    return this._invoker<MessageItem>(
+  createCustomMessage = (
+    params: CreateCustomMessageParams,
+    operationID = uuidV4()
+  ) => {
+    return this.invokeCore<MessageItem>(
       'createCustomMessage',
       window.createCustomMessage,
       [operationID, params.data, params.extension, params.description],
       data => {
-        // compitable with old version sdk
+        // Go synchronous factory methods return a single-item tuple.
         return data[0];
       }
     );
   };
-  createQuoteMessage = (params: QuoteMsgParams, operationID = uuidv4()) => {
-    return this._invoker<MessageItem>(
+  createQuoteMessage = (
+    params: CreateQuoteMessageParams,
+    operationID = uuidV4()
+  ) => {
+    return this.invokeCore<MessageItem>(
       'createQuoteMessage',
       window.createQuoteMessage,
       [operationID, params.text, params.message],
       data => {
-        // compitable with old version sdk
+        // Go synchronous factory methods return a single-item tuple.
         return data[0];
       }
     );
   };
   createAdvancedQuoteMessage = (
-    params: AdvancedQuoteMsgParams,
-    operationID = uuidv4()
+    params: CreateAdvancedQuoteMessageParams,
+    operationID = uuidV4()
   ) => {
-    return this._invoker<MessageItem>(
+    return this.invokeCore<MessageItem>(
       'createAdvancedQuoteMessage',
       window.createAdvancedQuoteMessage,
       [
@@ -470,26 +440,26 @@ class SDK extends Emitter {
         JSON.stringify(params.messageEntityList),
       ],
       data => {
-        // compitable with old version sdk
+        // Go synchronous factory methods return a single-item tuple.
         return data[0];
       }
     );
   };
   createAdvancedTextMessage = (
-    params: AdvancedMsgParams,
-    operationID = uuidv4()
+    params: CreateAdvancedTextMessageParams,
+    operationID = uuidV4()
   ) => {
-    return this._invoker<MessageItem>(
+    return this.invokeCore<MessageItem>(
       'createAdvancedTextMessage',
       window.createAdvancedTextMessage,
       [operationID, params.text, JSON.stringify(params.messageEntityList)],
       data => {
-        // compitable with old version sdk
+        // Go synchronous factory methods return a single-item tuple.
         return data[0];
       }
     );
   };
-  sendMessage = (params: SendMsgParams, operationID = uuidv4()) => {
+  sendMessage = (params: SendMessageParams, operationID = uuidV4()) => {
     const offlinePushInfo = params.offlinePushInfo ?? {
       title: 'You have a new message.',
       desc: '',
@@ -497,7 +467,7 @@ class SDK extends Emitter {
       iOSPushSound: '+1',
       iOSBadgeCount: true,
     };
-    return this._invoker<MessageItem>('sendMessage', window.sendMessage, [
+    return this.invokeCore<MessageItem>('sendMessage', window.sendMessage, [
       operationID,
       JSON.stringify(params.message),
       params.recvID,
@@ -506,7 +476,7 @@ class SDK extends Emitter {
       params.isOnlineOnly ?? false,
     ]);
   };
-  sendMessageNotOss = (params: SendMsgParams, operationID = uuidv4()) => {
+  sendMessageNotOss = (params: SendMessageParams, operationID = uuidV4()) => {
     const offlinePushInfo = params.offlinePushInfo ?? {
       title: 'You have a new message.',
       desc: '',
@@ -514,7 +484,7 @@ class SDK extends Emitter {
       iOSPushSound: '+1',
       iOSBadgeCount: true,
     };
-    return this._invoker<MessageItem>(
+    return this.invokeCore<MessageItem>(
       'sendMessageNotOss',
       window.sendMessageNotOss,
       [
@@ -528,161 +498,93 @@ class SDK extends Emitter {
     );
   };
 
-  setMessageLocalEx = <T>(
+  setMessageLocalEx = (
     params: SetMessageLocalExParams,
-    operationID = uuidv4()
+    operationID = uuidV4()
   ) => {
-    return this._invoker<T>('setMessageLocalEx', window.setMessageLocalEx, [
-      operationID,
-      params.conversationID,
-      params.clientMsgID,
-      params.localEx,
-    ]);
-  };
-
-  exportDB(operationID = uuidv4()) {
-    return this._invoker('exportDB', window.exportDB, [operationID]);
-  }
-
-  getHistoryMessageListReverse = (
-    params: GetHistoryMsgParams,
-    operationID = uuidv4()
-  ) => {
-    return this._invoker<AdvancedGetMessageResult>(
-      'getHistoryMessageListReverse',
-      window.getHistoryMessageListReverse,
-      [operationID, JSON.stringify(params)]
+    return this.invokeCore<void>(
+      'setMessageLocalEx',
+      window.setMessageLocalEx,
+      [operationID, params.conversationID, params.clientMsgID, params.localEx]
     );
   };
 
-  revokeMessage = <T>(data: AccessMessageParams, operationID = uuidv4()) => {
-    return this._invoker<T>('revokeMessage', window.revokeMessage, [
+  exportDB(operationID = uuidV4()) {
+    return this.invokeCore('exportDB', window.exportDB, [operationID]);
+  }
+
+  revokeMessage = (data: ConversationMessageParams, operationID = uuidV4()) => {
+    return this.invokeCore<void>('revokeMessage', window.revokeMessage, [
       operationID,
       data.conversationID,
       data.clientMsgID,
     ]);
   };
 
-  setConversation = <T>(
-    params: SetConversationParams,
-    operationID = uuidv4()
-  ) => {
-    return this._invoker<T>('setConversation', window.setConversation, [
+  setConversation = (params: SetConversationParams, operationID = uuidV4()) => {
+    return this.invokeCore<void>('setConversation', window.setConversation, [
       operationID,
       params.conversationID,
       JSON.stringify(params),
     ]);
   };
 
-  /**
-   * @deprecated Use setConversation instead.
-   */
-  setConversationPrivateChat = <T>(
-    params: SetConversationPrivateStateParams,
-    operationID = uuidv4()
-  ) => {
-    return this._invoker<T>(
-      'setConversationPrivateChat',
-      window.setConversation,
-      [
-        operationID,
-        params.conversationID,
-        JSON.stringify({
-          isPrivateChat: params.isPrivate,
-        }),
-      ]
-    );
-  };
-
-  /**
-   * @deprecated Use setConversation instead.
-   */
-  setConversationBurnDuration = <T>(
-    params: SetBurnDurationParams,
-    operationID = uuidv4()
-  ) => {
-    return this._invoker<T>(
-      'setConversationBurnDuration',
-      window.setConversation,
-      [
-        operationID,
-        params.conversationID,
-        JSON.stringify({
-          burnDuration: params.burnDuration,
-        }),
-      ]
-    );
-  };
-
-  getLoginStatus = (operationID = uuidv4()) => {
-    return this._invoker<LoginStatus>(
+  getLoginStatus = (operationID = uuidV4()) => {
+    return this.invokeCore<LoginStatus>(
       'getLoginStatus',
       window.getLoginStatus,
       [operationID],
       data => {
-        // compitable with old version sdk
+        // Go synchronous factory methods return a single-item tuple.
         return data[0];
       }
     );
   };
 
-  setAppBackgroundStatus = <T>(data: boolean, operationID = uuidv4()) => {
-    return this._invoker<T>(
+  setAppBackgroundStatus = (data: boolean, operationID = uuidV4()) => {
+    return this.invokeCore<void>(
       'setAppBackgroundStatus',
       window.setAppBackgroundStatus,
       [operationID, data]
     );
   };
 
-  networkStatusChanged = <T>(operationID = uuidv4()) => {
-    return this._invoker<T>(
+  networkStatusChanged = (operationID = uuidV4()) => {
+    return this.invokeCore<void>(
       'networkStatusChanged ',
       window.networkStatusChanged,
       [operationID]
     );
   };
 
-  getLoginUserID = (operationID = uuidv4()) => {
-    return this._invoker<string>('getLoginUserID', window.getLoginUserID, [
-      operationID,
-    ]);
-  };
-
-  getSelfUserInfo = (operationID = uuidv4()) => {
-    return this._invoker<SelfUserInfo>(
+  getSelfUserInfo = (operationID = uuidV4()) => {
+    return this.invokeCore<SelfUserInfo>(
       'getSelfUserInfo',
       window.getSelfUserInfo,
       [operationID]
     );
   };
 
-  getUsersInfo = (data: string[], operationID = uuidv4()) => {
-    return this._invoker<PublicUserItem[]>(
+  getUsersInfo = (data: string[], operationID = uuidV4()) => {
+    return this.invokeCore<PublicUserItem[]>(
       'getUsersInfo',
       window.getUsersInfo,
       [operationID, JSON.stringify(data)]
     );
   };
 
-  /**
-   * @deprecated Use setSelfInfo instead.
-   */
-  SetSelfInfoEx = <T>(data: PartialUserItem, operationID = uuidv4()) => {
-    return this._invoker<T>('SetSelfInfoEx', window.setSelfInfo, [
+  setSelfInfo = (data: SetSelfInfoParams, operationID = uuidV4()) => {
+    return this.invokeCore<void>('setSelfInfo', window.setSelfInfo, [
       operationID,
       JSON.stringify(data),
     ]);
   };
 
-  setSelfInfo = <T>(data: PartialUserItem, operationID = uuidv4()) => {
-    return this._invoker<T>('setSelfInfo', window.setSelfInfo, [
-      operationID,
-      JSON.stringify(data),
-    ]);
-  };
-
-  createTextAtMessage = (data: AtMsgParams, operationID = uuidv4()) => {
-    return this._invoker<MessageItem>(
+  createTextAtMessage = (
+    data: CreateTextAtMessageParams,
+    operationID = uuidV4()
+  ) => {
+    return this.invokeCore<MessageItem>(
       'createTextAtMessage',
       window.createTextAtMessage,
       [
@@ -693,110 +595,192 @@ class SDK extends Emitter {
         JSON.stringify(data.message) ?? '',
       ],
       data => {
-        // compitable with old version sdk
+        // Go synchronous factory methods return a single-item tuple.
         return data[0];
       }
     );
   };
   createSoundMessageByURL = (
-    data: SoundMsgParamsByURL,
-    operationID = uuidv4()
+    data: CreateSoundMessageByURLParams,
+    operationID = uuidV4()
   ) => {
-    return this._invoker<MessageItem>(
+    return this.invokeCore<MessageItem>(
       'createSoundMessageByURL',
       window.createSoundMessageByURL,
       [operationID, JSON.stringify(data)],
       data => {
-        // compitable with old version sdk
+        // Go synchronous factory methods return a single-item tuple.
         return data[0];
       }
     );
   };
+  createSoundMessage = (
+    soundPath: string,
+    duration: number,
+    operationID = uuidV4()
+  ) => {
+    return this.invokeCore<MessageItem | ''>(
+      'createSoundMessage',
+      window.createSoundMessage,
+      [operationID, soundPath, duration],
+      data => data[0]
+    );
+  };
+  createSoundMessageFromFullPath = (
+    soundPath: string,
+    duration: number,
+    operationID = uuidV4()
+  ) => {
+    return this.invokeCore<MessageItem | ''>(
+      'createSoundMessageFromFullPath',
+      window.createSoundMessageFromFullPath,
+      [operationID, soundPath, duration],
+      data => data[0]
+    );
+  };
   createSoundMessageByFile = (
-    data: SoundMsgParamsByURL & { file: File },
-    operationID = uuidv4()
+    data: CreateSoundMessageByURLParams & { file: File },
+    operationID = uuidV4()
   ) => {
     data.uuid = `${data.uuid}/${data.file.name}`;
     window.fileMapSet(data.uuid, data.file);
-    return this._invoker<MessageItem>(
+    return this.invokeCore<MessageItem>(
       'createSoundMessageByFile',
       window.createSoundMessageByURL,
       [operationID, JSON.stringify(data)],
       data => {
-        // compitable with old version sdk
+        // Go synchronous factory methods return a single-item tuple.
         return data[0];
       }
     );
   };
 
   createVideoMessageByURL = (
-    data: VideoMsgParamsByURL,
-    operationID = uuidv4()
+    data: CreateVideoMessageByURLParams,
+    operationID = uuidV4()
   ) => {
-    return this._invoker<MessageItem>(
+    return this.invokeCore<MessageItem>(
       'createVideoMessageByURL',
       window.createVideoMessageByURL,
       [operationID, JSON.stringify(data)],
       data => {
-        // compitable with old version sdk
+        // Go synchronous factory methods return a single-item tuple.
         return data[0];
       }
     );
   };
+  createVideoMessage = (
+    videoPath: string,
+    videoType: string,
+    duration: number,
+    snapshotPath: string,
+    operationID = uuidV4()
+  ) => {
+    return this.invokeCore<MessageItem | ''>(
+      'createVideoMessage',
+      window.createVideoMessage,
+      [operationID, videoPath, videoType, duration, snapshotPath],
+      data => data[0]
+    );
+  };
+  createVideoMessageFromFullPath = (
+    videoFullPath: string,
+    videoType: string,
+    duration: number,
+    snapshotFullPath: string,
+    operationID = uuidV4()
+  ) => {
+    return this.invokeCore<MessageItem | ''>(
+      'createVideoMessageFromFullPath',
+      window.createVideoMessageFromFullPath,
+      [operationID, videoFullPath, videoType, duration, snapshotFullPath],
+      data => data[0]
+    );
+  };
 
   createVideoMessageByFile = (
-    data: VideoMsgParamsByURL & { videoFile: File; snapshotFile: File },
-    operationID = uuidv4()
+    data: CreateVideoMessageByURLParams & {
+      videoFile: File;
+      snapshotFile: File;
+    },
+    operationID = uuidV4()
   ) => {
     data.videoUUID = `${data.videoUUID}/${data.videoFile.name}`;
     data.snapshotUUID = `${data.snapshotUUID}/${data.snapshotFile.name}`;
     window.fileMapSet(data.videoUUID, data.videoFile);
     window.fileMapSet(data.snapshotUUID, data.snapshotFile);
-    return this._invoker<MessageItem>(
+    return this.invokeCore<MessageItem>(
       'createVideoMessageByFile',
       window.createVideoMessageByURL,
       [operationID, JSON.stringify(data)],
       data => {
-        // compitable with old version sdk
+        // Go synchronous factory methods return a single-item tuple.
         return data[0];
       }
     );
   };
 
   createFileMessageByURL = (
-    data: FileMsgParamsByURL,
-    operationID = uuidv4()
+    data: CreateFileMessageByURLParams,
+    operationID = uuidV4()
   ) => {
-    return this._invoker<MessageItem>(
+    return this.invokeCore<MessageItem>(
       'createFileMessageByURL',
       window.createFileMessageByURL,
       [operationID, JSON.stringify(data)],
       data => {
-        // compitable with old version sdk
+        // Go synchronous factory methods return a single-item tuple.
         return data[0];
       }
+    );
+  };
+  createFileMessage = (
+    filePath: string,
+    fileName: string,
+    operationID = uuidV4()
+  ) => {
+    return this.invokeCore<MessageItem | ''>(
+      'createFileMessage',
+      window.createFileMessage,
+      [operationID, filePath, fileName],
+      data => data[0]
+    );
+  };
+  createFileMessageFromFullPath = (
+    fileFullPath: string,
+    fileName: string,
+    operationID = uuidV4()
+  ) => {
+    return this.invokeCore<MessageItem | ''>(
+      'createFileMessageFromFullPath',
+      window.createFileMessageFromFullPath,
+      [operationID, fileFullPath, fileName],
+      data => data[0]
     );
   };
 
   createFileMessageByFile = (
-    data: FileMsgParamsByURL & { file: File },
-    operationID = uuidv4()
+    data: CreateFileMessageByURLParams & { file: File },
+    operationID = uuidV4()
   ) => {
     data.uuid = `${data.uuid}/${data.file.name}`;
     window.fileMapSet(data.uuid, data.file);
-    return this._invoker<MessageItem>(
+    return this.invokeCore<MessageItem>(
       'createFileMessageByFile',
       window.createFileMessageByURL,
       [operationID, JSON.stringify(data)],
       data => {
-        // compitable with old version sdk
+        // Go synchronous factory methods return a single-item tuple.
         return data[0];
       }
     );
   };
 
-  createMergerMessage = (data: MergerMsgParams, operationID = uuidv4()) => {
-    return this._invoker<MessageItem>(
+  createMergerMessage = (
+    data: CreateMergerMessageParams,
+    operationID = uuidV4()
+  ) => {
+    return this.invokeCore<MessageItem>(
       'createMergerMessage ',
       window.createMergerMessage,
       [
@@ -806,311 +790,222 @@ class SDK extends Emitter {
         JSON.stringify(data.summaryList),
       ],
       data => {
-        // compitable with old version sdk
+        // Go synchronous factory methods return a single-item tuple.
         return data[0];
       }
     );
   };
 
-  createForwardMessage = (data: MessageItem, operationID = uuidv4()) => {
-    return this._invoker<MessageItem>(
+  createForwardMessage = (data: MessageItem, operationID = uuidV4()) => {
+    return this.invokeCore<MessageItem>(
       'createForwardMessage ',
       window.createForwardMessage,
       [operationID, JSON.stringify(data)],
       data => {
-        // compitable with old version sdk
+        // Go synchronous factory methods return a single-item tuple.
         return data[0];
       }
     );
   };
 
-  createFaceMessage = (data: FaceMessageParams, operationID = uuidv4()) => {
-    return this._invoker<MessageItem>(
+  createFaceMessage = (
+    data: CreateFaceMessageParams,
+    operationID = uuidV4()
+  ) => {
+    return this.invokeCore<MessageItem>(
       'createFaceMessage ',
       window.createFaceMessage,
       [operationID, data.index, data.data],
       data => {
-        // compitable with old version sdk
+        // Go synchronous factory methods return a single-item tuple.
         return data[0];
       }
     );
   };
 
-  createLocationMessage = (data: LocationMsgParams, operationID = uuidv4()) => {
-    return this._invoker<MessageItem>(
+  createLocationMessage = (
+    data: CreateLocationMessageParams,
+    operationID = uuidV4()
+  ) => {
+    return this.invokeCore<MessageItem>(
       'createLocationMessage ',
       window.createLocationMessage,
       [operationID, data.description, data.longitude, data.latitude],
       data => {
-        // compitable with old version sdk
+        // Go synchronous factory methods return a single-item tuple.
         return data[0];
       }
     );
   };
 
-  createCardMessage = (data: CardElem, operationID = uuidv4()) => {
-    return this._invoker<MessageItem>(
+  createCardMessage = (data: CardElem, operationID = uuidV4()) => {
+    return this.invokeCore<MessageItem>(
       'createCardMessage ',
       window.createCardMessage,
       [operationID, JSON.stringify(data)],
       data => {
-        // compitable with old version sdk
+        // Go synchronous factory methods return a single-item tuple.
         return data[0];
       }
     );
   };
 
-  deleteMessageFromLocalStorage = <T>(
-    data: AccessMessageParams,
-    operationID = uuidv4()
+  deleteMessageFromLocalStorage = (
+    data: ConversationMessageParams,
+    operationID = uuidV4()
   ) => {
-    return this._invoker<T>(
+    return this.invokeCore<void>(
       'deleteMessageFromLocalStorage ',
       window.deleteMessageFromLocalStorage,
       [operationID, data.conversationID, data.clientMsgID]
     );
   };
 
-  deleteMessage = <T>(data: AccessMessageParams, operationID = uuidv4()) => {
-    return this._invoker<T>('deleteMessage ', window.deleteMessage, [
+  deleteMessage = (data: ConversationMessageParams, operationID = uuidV4()) => {
+    return this.invokeCore<void>('deleteMessage ', window.deleteMessage, [
       operationID,
       data.conversationID,
       data.clientMsgID,
     ]);
   };
 
-  deleteAllConversationFromLocal = <T>(operationID = uuidv4()) => {
-    return this._invoker<T>(
-      'deleteAllConversationFromLocal ',
-      window.deleteAllConversationFromLocal,
+  hideAllConversations = (operationID = uuidV4()) => {
+    return this.invokeCore<void>(
+      'hideAllConversations',
+      window.hideAllConversations,
       [operationID]
     );
   };
 
-  deleteAllMsgFromLocal = <T>(operationID = uuidv4()) => {
-    return this._invoker<T>(
+  deleteAllMsgFromLocal = (operationID = uuidV4()) => {
+    return this.invokeCore<void>(
       'deleteAllMsgFromLocal ',
       window.deleteAllMsgFromLocal,
       [operationID]
     );
   };
 
-  deleteAllMsgFromLocalAndSvr = <T>(operationID = uuidv4()) => {
-    return this._invoker<T>(
+  deleteAllMsgFromLocalAndSvr = (operationID = uuidV4()) => {
+    return this.invokeCore<void>(
       'deleteAllMsgFromLocalAndSvr ',
       window.deleteAllMsgFromLocalAndSvr,
       [operationID]
     );
   };
 
-  insertSingleMessageToLocalStorage = <T>(
-    data: InsertSingleMsgParams,
-    operationID = uuidv4()
+  insertSingleMessageToLocalStorage = (
+    data: InsertSingleMessageToLocalStorageParams,
+    operationID = uuidV4()
   ) => {
-    return this._invoker<T>(
+    return this.invokeCore<MessageItem>(
       'insertSingleMessageToLocalStorage ',
       window.insertSingleMessageToLocalStorage,
       [operationID, JSON.stringify(data.message), data.recvID, data.sendID]
     );
   };
 
-  insertGroupMessageToLocalStorage = <T>(
-    data: InsertGroupMsgParams,
-    operationID = uuidv4()
+  insertGroupMessageToLocalStorage = (
+    data: InsertGroupMessageToLocalStorageParams,
+    operationID = uuidV4()
   ) => {
-    return this._invoker<T>(
+    return this.invokeCore<MessageItem>(
       'insertGroupMessageToLocalStorage ',
       window.insertGroupMessageToLocalStorage,
       [operationID, JSON.stringify(data.message), data.groupID, data.sendID]
     );
   };
-  /**
-   * @deprecated Use changeInputStates instead.
-   */
-  typingStatusUpdate = <T>(
-    data: TypingUpdateParams,
-    operationID = uuidv4()
-  ) => {
-    return this._invoker<T>('typingStatusUpdate ', window.typingStatusUpdate, [
-      operationID,
-      data.recvID,
-      data.msgTip,
-    ]);
-  };
   changeInputStates = (
     data: ChangeInputStatesParams,
-    operationID = uuidv4()
+    operationID = uuidV4()
   ) => {
-    return this._invoker<void>('changeInputStates ', window.changeInputStates, [
-      operationID,
-      data.conversationID,
-      data.focus,
-    ]);
+    return this.invokeCore<void>(
+      'changeInputStates ',
+      window.changeInputStates,
+      [operationID, data.conversationID, data.focus]
+    );
   };
-  getInputstates = (data: GetInputstatesParams, operationID = uuidv4()) => {
-    return this._invoker<Platform[]>('getInputstates ', window.getInputstates, [
-      operationID,
-      data.conversationID,
-      data.userID,
-    ]);
+  getInputStates = (data: GetInputStatesParams, operationID = uuidV4()) => {
+    return this.invokeCore<Platform[]>(
+      'getInputStates',
+      window.getInputStates,
+      [operationID, data.conversationID, data.userID]
+    );
   };
-  clearConversationAndDeleteAllMsg = <T>(
-    data: string,
-    operationID = uuidv4()
-  ) => {
-    return this._invoker<T>(
+  clearConversationAndDeleteAllMsg = (data: string, operationID = uuidV4()) => {
+    return this.invokeCore<void>(
       'clearConversationAndDeleteAllMsg ',
       window.clearConversationAndDeleteAllMsg,
       [operationID, data]
     );
   };
-  hideConversation = <T>(data: string, operationID = uuidv4()) => {
-    return this._invoker<T>('hideConversation ', window.hideConversation, [
+  hideConversation = (data: string, operationID = uuidV4()) => {
+    return this.invokeCore<void>('hideConversation ', window.hideConversation, [
       operationID,
       data,
     ]);
   };
   getConversationListSplit = (
-    data: SplitConversationParams,
-    operationID = uuidv4()
+    data: ConversationListPaginationParams,
+    operationID = uuidV4()
   ) => {
-    return this._invoker<ConversationItem[]>(
+    return this.invokeCore<ConversationItem[]>(
       'getConversationListSplit ',
       window.getConversationListSplit,
       [operationID, data.offset, data.count]
     );
   };
-  // searchConversation = (data: SplitConversationParams, operationID = uuidv4()) => {
-  //   return this._invoker<ConversationItem[]>(
-  //     'searchConversation ',
-  //     window.searchConversation,
-  //     [operationID, data.offset, data.count]
-  //   );
-  // };
-  /**
-   * @deprecated Use setConversation instead.
-   */
-  setConversationEx = (
-    data: SetConversationExParams,
-    operationID = uuidv4()
-  ) => {
-    return this._invoker<ConversationItem[]>(
-      'setConversationEx ',
-      window.setConversation,
-      [
-        operationID,
-        data.conversationID,
-        JSON.stringify({
-          ex: data.ex,
-        }),
-      ]
+  searchConversation = (searchParam: string, operationID = uuidV4()) => {
+    return this.invokeCore<ConversationItem[]>(
+      'searchConversation',
+      window.searchConversation,
+      [operationID, searchParam]
     );
   };
-  getConversationIDBySessionType = (
-    data: GetOneConversationParams,
-    operationID = uuidv4()
-  ) => {
-    return this._invoker<string>(
-      'getConversationIDBySessionType ',
-      window.getConversationIDBySessionType,
-      [operationID, data.sourceID, data.sessionType]
-    );
-  };
-
-  getMultipleConversation = (data: string[], operationID = uuidv4()) => {
-    return this._invoker<ConversationItem[]>(
+  getMultipleConversation = (data: string[], operationID = uuidV4()) => {
+    return this.invokeCore<ConversationItem[]>(
       'getMultipleConversation ',
       window.getMultipleConversation,
       [operationID, JSON.stringify(data)]
     );
   };
 
-  deleteConversation = <T>(data: string, operationID = uuidv4()) => {
-    return this._invoker<T>('deleteConversation ', window.deleteConversation, [
-      operationID,
-      data,
-    ]);
-  };
-
-  /**
-   * @deprecated Use setConversation instead.
-   */
-  setConversationDraft = <T>(
+  setConversationDraft = (
     data: SetConversationDraftParams,
-    operationID = uuidv4()
+    operationID = uuidV4()
   ) => {
-    return this._invoker<T>(
+    return this.invokeCore<void>(
       'setConversationDraft ',
       window.setConversationDraft,
       [operationID, data.conversationID, data.draftText]
     );
   };
 
-  /**
-   * @deprecated Use setConversation instead.
-   */
-  pinConversation = <T>(
-    data: SetConversationPinParams,
-    operationID = uuidv4()
-  ) => {
-    return this._invoker<T>('pinConversation ', window.setConversation, [
-      operationID,
-      data.conversationID,
-      JSON.stringify({
-        isPinned: data.isPinned,
-      }),
-    ]);
-  };
-  getTotalUnreadMsgCount = (operationID = uuidv4()) => {
-    return this._invoker<number>(
+  getTotalUnreadMsgCount = (operationID = uuidV4()) => {
+    return this.invokeCore<number>(
       'getTotalUnreadMsgCount ',
       window.getTotalUnreadMsgCount,
       [operationID]
     );
   };
 
-  getConversationRecvMessageOpt = (data: string[], operationID = uuidv4()) => {
-    return this._invoker<ConversationItem[]>(
-      'getConversationRecvMessageOpt ',
-      window.getConversationRecvMessageOpt,
-      [operationID, JSON.stringify(data)]
-    );
-  };
-
-  /**
-   * @deprecated Use setConversation instead.
-   */
-  setConversationRecvMessageOpt = <T>(
-    data: SetConversationRecvOptParams,
-    operationID = uuidv4()
+  searchLocalMessages = (
+    data: SearchLocalMessagesParams,
+    operationID = uuidV4()
   ) => {
-    return this._invoker<T>(
-      'setConversationRecvMessageOpt ',
-      window.setConversation,
-      [
-        operationID,
-        data.conversationID,
-        JSON.stringify({
-          recvMsgOpt: data.opt,
-        }),
-      ]
-    );
-  };
-  searchLocalMessages = (data: SearchLocalParams, operationID = uuidv4()) => {
-    return this._invoker<SearchMessageResult>(
+    return this.invokeCore<SearchMessageResult>(
       'searchLocalMessages ',
       window.searchLocalMessages,
       [operationID, JSON.stringify(data)]
     );
   };
-  addFriend = <T>(data: AddFriendParams, operationID = uuidv4()) => {
-    return this._invoker<T>('addFriend ', window.addFriend, [
+  addFriend = (data: AddFriendParams, operationID = uuidV4()) => {
+    return this.invokeCore<void>('addFriend ', window.addFriend, [
       operationID,
       JSON.stringify(data),
     ]);
   };
-  searchFriends = (data: SearchFriendParams, operationID = uuidv4()) => {
-    return this._invoker<SearchedFriendsInfo[]>(
+  searchFriends = (data: SearchFriendsParams, operationID = uuidV4()) => {
+    return this.invokeCore<SearchFriendsResultItem[]>(
       'searchFriends ',
       window.searchFriends,
       [operationID, JSON.stringify(data)]
@@ -1118,9 +1013,9 @@ class SDK extends Emitter {
   };
   getSpecifiedFriendsInfo = (
     data: GetSpecifiedFriendsParams,
-    operationID = uuidv4()
+    operationID = uuidV4()
   ) => {
-    return this._invoker<FriendUserItem[]>(
+    return this.invokeCore<FriendUserItem[]>(
       'getSpecifiedFriendsInfo',
       window.getSpecifiedFriendsInfo,
       [operationID, JSON.stringify(data.friendUserIDList), data.filterBlack]
@@ -1132,200 +1027,166 @@ class SDK extends Emitter {
       offset: 0,
       count: 0,
     },
-    operationID = uuidv4()
+    operationID = uuidV4()
   ) => {
-    return this._invoker<FriendApplicationItem[]>(
+    return this.invokeCore<FriendApplicationItem[]>(
       'getFriendApplicationListAsRecipient ',
       window.getFriendApplicationListAsRecipient,
       [operationID, JSON.stringify(data)]
     );
   };
   getFriendApplicationListAsApplicant = (
-    data: GetFriendApplicationListAsApplicationParams = {
+    data: GetFriendApplicationListAsApplicantParams = {
       offset: 0,
       count: 0,
     },
-    operationID = uuidv4()
+    operationID = uuidV4()
   ) => {
-    return this._invoker<FriendApplicationItem[]>(
+    return this.invokeCore<FriendApplicationItem[]>(
       'getFriendApplicationListAsApplicant ',
       window.getFriendApplicationListAsApplicant,
       [operationID, JSON.stringify(data)]
     );
   };
   getFriendApplicationUnhandledCount = (
-    data: GetSelfUnhandledApplyCountParams,
-    operationID = uuidv4()
+    data: ApplicationUnhandledCountParams,
+    operationID = uuidV4()
   ) => {
-    return this._invoker<number>(
+    return this.invokeCore<number>(
       'getFriendApplicationUnhandledCount ',
       window.getFriendApplicationUnhandledCount,
       [operationID, JSON.stringify(data)]
     );
   };
-  getFriendList = (filterBlack = false, operationID = uuidv4()) => {
-    return this._invoker<FriendUserItem[]>(
+  getFriendList = (filterBlack = false, operationID = uuidV4()) => {
+    return this.invokeCore<FriendUserItem[]>(
       'getFriendList ',
       window.getFriendList,
       [operationID, filterBlack]
     );
   };
   getFriendListPage = (
-    data: OffsetParams & { filterBlack?: boolean },
-    operationID = uuidv4()
+    data: PaginationParams & { filterBlack?: boolean },
+    operationID = uuidV4()
   ) => {
-    return this._invoker<FriendUserItem[]>(
+    return this.invokeCore<FriendUserItem[]>(
       'getFriendListPage ',
       window.getFriendListPage,
       [operationID, data.offset, data.count, data.filterBlack ?? false]
     );
   };
-  updateFriends = <T>(data: UpdateFriendsParams, operationID = uuidv4()) => {
-    return this._invoker<T>('updateFriends ', window.updateFriends, [
+  updateFriends = (data: UpdateFriendsParams, operationID = uuidV4()) => {
+    return this.invokeCore<void>('updateFriends ', window.updateFriends, [
       operationID,
       JSON.stringify(data),
     ]);
   };
-  /**
-   * @deprecated Use updateFriends instead.
-   */
-  setFriendRemark = <T>(data: RemarkFriendParams, operationID = uuidv4()) => {
-    return this._invoker<T>('setFriendRemark ', window.updateFriends, [
-      operationID,
-      JSON.stringify({
-        friendUserIDs: [data.toUserID],
-        remark: data.remark,
-      }),
-    ]);
+  checkFriend = (data: string[], operationID = uuidV4()) => {
+    return this.invokeCore<CheckFriendResultItem[]>(
+      'checkFriend',
+      window.checkFriend,
+      [operationID, JSON.stringify(data)]
+    );
   };
-  /**
-   * @deprecated Use updateFriends instead.
-   */
-  pinFriends = <T>(data: PinFriendParams, operationID = uuidv4()) => {
-    return this._invoker<T>('pinFriends ', window.updateFriends, [
-      operationID,
-      JSON.stringify({
-        friendUserIDs: data.toUserIDs,
-        isPinned: data.isPinned,
-      }),
-    ]);
-  };
-  /**
-   * @deprecated Use updateFriends instead.
-   */
-  setFriendsEx = <T>(data: SetFriendExParams, operationID = uuidv4()) => {
-    return this._invoker<T>('setFriendsEx ', window.updateFriends, [
-      operationID,
-      JSON.stringify({
-        friendUserIDs: data.toUserIDs,
-        ex: data.ex,
-      }),
-      data.ex,
-    ]);
-  };
-  checkFriend = (data: string[], operationID = uuidv4()) => {
-    return this._invoker<FriendshipInfo[]>('checkFriend', window.checkFriend, [
-      operationID,
-      JSON.stringify(data),
-    ]);
-  };
-  acceptFriendApplication = <T>(
-    data: AccessFriendApplicationParams,
-    operationID = uuidv4()
+  acceptFriendApplication = (
+    data: HandleFriendApplicationParams,
+    operationID = uuidV4()
   ) => {
-    return this._invoker<T>(
+    return this.invokeCore<void>(
       'acceptFriendApplication',
       window.acceptFriendApplication,
       [operationID, JSON.stringify(data)]
     );
   };
-  refuseFriendApplication = <T>(
-    data: AccessFriendApplicationParams,
-    operationID = uuidv4()
+  refuseFriendApplication = (
+    data: HandleFriendApplicationParams,
+    operationID = uuidV4()
   ) => {
-    return this._invoker<T>(
+    return this.invokeCore<void>(
       'refuseFriendApplication ',
       window.refuseFriendApplication,
       [operationID, JSON.stringify(data)]
     );
   };
-  deleteFriend = <T>(data: string, operationID = uuidv4()) => {
-    return this._invoker<T>('deleteFriend ', window.deleteFriend, [
+  deleteFriend = (data: string, operationID = uuidV4()) => {
+    return this.invokeCore<void>('deleteFriend ', window.deleteFriend, [
       operationID,
       data,
     ]);
   };
-  addBlack = <T>(data: AddBlackParams, operationID = uuidv4()) => {
-    return this._invoker<T>('addBlack ', window.addBlack, [
+  addBlack = (data: AddBlackParams, operationID = uuidV4()) => {
+    return this.invokeCore<void>('addBlack ', window.addBlack, [
       operationID,
       data.toUserID,
       data.ex ?? '',
     ]);
   };
-  removeBlack = <T>(data: string, operationID = uuidv4()) => {
-    return this._invoker<T>('removeBlack ', window.removeBlack, [
+  removeBlack = (data: string, operationID = uuidV4()) => {
+    return this.invokeCore<void>('removeBlack ', window.removeBlack, [
       operationID,
       data,
     ]);
   };
-  getBlackList = (operationID = uuidv4()) => {
-    return this._invoker<BlackUserItem[]>(
+  getBlackList = (operationID = uuidV4()) => {
+    return this.invokeCore<BlackUserItem[]>(
       'getBlackList ',
       window.getBlackList,
       [operationID]
     );
   };
-  inviteUserToGroup = <T>(
-    data: AccessToGroupParams,
-    operationID = uuidv4()
+  inviteUserToGroup = (
+    data: GroupMemberOperationParams,
+    operationID = uuidV4()
   ) => {
-    return this._invoker<T>('inviteUserToGroup ', window.inviteUserToGroup, [
+    return this.invokeCore<void>(
+      'inviteUserToGroup ',
+      window.inviteUserToGroup,
+      [operationID, data.groupID, data.reason, JSON.stringify(data.userIDList)]
+    );
+  };
+  kickGroupMember = (
+    data: GroupMemberOperationParams,
+    operationID = uuidV4()
+  ) => {
+    return this.invokeCore<void>('kickGroupMember ', window.kickGroupMember, [
       operationID,
       data.groupID,
       data.reason,
       JSON.stringify(data.userIDList),
     ]);
   };
-  kickGroupMember = <T>(data: AccessToGroupParams, operationID = uuidv4()) => {
-    return this._invoker<T>('kickGroupMember ', window.kickGroupMember, [
-      operationID,
-      data.groupID,
-      data.reason,
-      JSON.stringify(data.userIDList),
-    ]);
-  };
-  isJoinGroup = <T>(data: string, operationID = uuidv4()) => {
-    return this._invoker<T>('isJoinGroup ', window.isJoinGroup, [
+  isJoinGroup = (data: string, operationID = uuidV4()) => {
+    return this.invokeCore<boolean>('isJoinGroup ', window.isJoinGroup, [
       operationID,
       data,
     ]);
   };
 
   getSpecifiedGroupMembersInfo = (
-    data: Omit<AccessToGroupParams, 'reason'>,
-    operationID = uuidv4()
+    data: GroupMemberUserListParams,
+    operationID = uuidV4()
   ) => {
-    return this._invoker<GroupMemberItem[]>(
+    return this.invokeCore<GroupMemberItem[]>(
       'getSpecifiedGroupMembersInfo ',
       window.getSpecifiedGroupMembersInfo,
       [operationID, data.groupID, JSON.stringify(data.userIDList)]
     );
   };
   getUsersInGroup = (
-    data: Omit<AccessToGroupParams, 'reason'>,
-    operationID = uuidv4()
+    data: GroupMemberUserListParams,
+    operationID = uuidV4()
   ) => {
-    return this._invoker<string[]>('getUsersInGroup ', window.getUsersInGroup, [
-      operationID,
-      data.groupID,
-      JSON.stringify(data.userIDList),
-    ]);
+    return this.invokeCore<string[]>(
+      'getUsersInGroup ',
+      window.getUsersInGroup,
+      [operationID, data.groupID, JSON.stringify(data.userIDList)]
+    );
   };
   getGroupMemberListByJoinTimeFilter = (
-    data: GetGroupMemberByTimeParams,
-    operationID = uuidv4()
+    data: GetGroupMemberListByJoinTimeFilterParams,
+    operationID = uuidV4()
   ) => {
-    return this._invoker<GroupMemberItem[]>(
+    return this.invokeCore<GroupMemberItem[]>(
       'getGroupMemberListByJoinTimeFilter ',
       window.getGroupMemberListByJoinTimeFilter,
       [
@@ -1340,105 +1201,56 @@ class SDK extends Emitter {
     );
   };
   searchGroupMembers = (
-    data: SearchGroupMemberParams,
-    operationID = uuidv4()
+    data: SearchGroupMembersParams,
+    operationID = uuidV4()
   ) => {
-    return this._invoker<GroupMemberItem[]>(
+    return this.invokeCore<GroupMemberItem[]>(
       'searchGroupMembers ',
       window.searchGroupMembers,
       [operationID, JSON.stringify(data)]
     );
   };
-  /**
-   * @deprecated Use setGroupInfo instead.
-   */
-  setGroupApplyMemberFriend = <T>(
-    data: SetMemberPermissionParams,
-    operationID = uuidv4()
-  ) => {
-    return this._invoker<T>('setGroupApplyMemberFriend ', window.setGroupInfo, [
-      operationID,
-      JSON.stringify({
-        groupID: data.groupID,
-        applyMemberFriend: data.rule,
-      }),
-    ]);
-  };
-  /**
-   * @deprecated Use setGroupInfo instead.
-   */
-  setGroupLookMemberInfo = <T>(
-    data: SetMemberPermissionParams,
-    operationID = uuidv4()
-  ) => {
-    return this._invoker<T>('setGroupLookMemberInfo ', window.setGroupInfo, [
-      operationID,
-      JSON.stringify({
-        groupID: data.groupID,
-        lookMemberInfo: data.rule,
-      }),
-    ]);
-  };
-  getJoinedGroupList = (operationID = uuidv4()) => {
-    return this._invoker<GroupItem[]>(
+  getJoinedGroupList = (operationID = uuidV4()) => {
+    return this.invokeCore<GroupItem[]>(
       'getJoinedGroupList ',
       window.getJoinedGroupList,
       [operationID]
     );
   };
-  getJoinedGroupListPage = (data: OffsetParams, operationID = uuidv4()) => {
-    return this._invoker<GroupItem[]>(
+  getJoinedGroupListPage = (data: PaginationParams, operationID = uuidV4()) => {
+    return this.invokeCore<GroupItem[]>(
       'getJoinedGroupListPage ',
       window.getJoinedGroupListPage,
       [operationID, data.offset, data.count]
     );
   };
-  createGroup = (data: CreateGroupParams, operationID = uuidv4()) => {
-    return this._invoker<GroupItem>('createGroup ', window.createGroup, [
+  createGroup = (data: CreateGroupParams, operationID = uuidV4()) => {
+    return this.invokeCore<GroupItem>('createGroup ', window.createGroup, [
       operationID,
       JSON.stringify(data),
     ]);
   };
-  setGroupInfo = <T>(
+  setGroupInfo = (
     data: Partial<GroupItem> & { groupID: string },
-    operationID = uuidv4()
+    operationID = uuidV4()
   ) => {
-    return this._invoker<T>('setGroupInfo ', window.setGroupInfo, [
+    return this.invokeCore<void>('setGroupInfo ', window.setGroupInfo, [
       operationID,
       JSON.stringify(data),
     ]);
   };
-  /**
-   * @deprecated Use setGroupMemberInfo instead.
-   */
-  setGroupMemberNickname = <T>(
-    data: SetGroupMemberNickParams,
-    operationID = uuidv4()
+  setGroupMemberInfo = (
+    data: SetGroupMemberInfoParams,
+    operationID = uuidV4()
   ) => {
-    return this._invoker<T>(
-      'setGroupMemberNickname ',
+    return this.invokeCore<void>(
+      'setGroupMemberInfo ',
       window.setGroupMemberInfo,
-      [
-        operationID,
-        JSON.stringify({
-          groupID: data.groupID,
-          userID: data.userID,
-          nickname: data.groupMemberNickname,
-        }),
-      ]
+      [operationID, JSON.stringify(data)]
     );
   };
-  setGroupMemberInfo = <T>(
-    data: UpdateMemberInfoParams,
-    operationID = uuidv4()
-  ) => {
-    return this._invoker<T>('setGroupMemberInfo ', window.setGroupMemberInfo, [
-      operationID,
-      JSON.stringify(data),
-    ]);
-  };
-  joinGroup = <T>(data: JoinGroupParams, operationID = uuidv4()) => {
-    return this._invoker<T>('joinGroup ', window.joinGroup, [
+  joinGroup = (data: JoinGroupParams, operationID = uuidV4()) => {
+    return this.invokeCore<void>('joinGroup ', window.joinGroup, [
       operationID,
       data.groupID,
       data.reqMsg,
@@ -1446,195 +1258,134 @@ class SDK extends Emitter {
       data.ex ?? '',
     ]);
   };
-  searchGroups = (data: SearchGroupParams, operationID = uuidv4()) => {
-    return this._invoker<GroupItem[]>('searchGroups ', window.searchGroups, [
+  searchGroups = (data: SearchGroupsParams, operationID = uuidV4()) => {
+    return this.invokeCore<GroupItem[]>('searchGroups ', window.searchGroups, [
       operationID,
       JSON.stringify(data),
     ]);
   };
-  quitGroup = <T>(data: string, operationID = uuidv4()) => {
-    return this._invoker<T>('quitGroup ', window.quitGroup, [
+  quitGroup = (data: string, operationID = uuidV4()) => {
+    return this.invokeCore<void>('quitGroup ', window.quitGroup, [
       operationID,
       data,
     ]);
   };
-  dismissGroup = <T>(data: string, operationID = uuidv4()) => {
-    return this._invoker<T>('dismissGroup ', window.dismissGroup, [
+  dismissGroup = (data: string, operationID = uuidV4()) => {
+    return this.invokeCore<void>('dismissGroup ', window.dismissGroup, [
       operationID,
       data,
     ]);
   };
-  changeGroupMute = <T>(
-    data: ChangeGroupMuteParams,
-    operationID = uuidv4()
-  ) => {
-    return this._invoker<T>('changeGroupMute ', window.changeGroupMute, [
+  changeGroupMute = (data: ChangeGroupMuteParams, operationID = uuidV4()) => {
+    return this.invokeCore<void>('changeGroupMute ', window.changeGroupMute, [
       operationID,
       data.groupID,
       data.isMute,
     ]);
   };
-  changeGroupMemberMute = <T>(
+  changeGroupMemberMute = (
     data: ChangeGroupMemberMuteParams,
-    operationID = uuidv4()
+    operationID = uuidV4()
   ) => {
-    return this._invoker<T>(
+    return this.invokeCore<void>(
       'changeGroupMemberMute ',
       window.changeGroupMemberMute,
       [operationID, data.groupID, data.userID, data.mutedSeconds]
     );
   };
-  transferGroupOwner = <T>(
-    data: TransferGroupParams,
-    operationID = uuidv4()
+  transferGroupOwner = (
+    data: TransferGroupOwnerParams,
+    operationID = uuidV4()
   ) => {
-    return this._invoker<T>('transferGroupOwner ', window.transferGroupOwner, [
-      operationID,
-      data.groupID,
-      data.newOwnerUserID,
-    ]);
+    return this.invokeCore<void>(
+      'transferGroupOwner ',
+      window.transferGroupOwner,
+      [operationID, data.groupID, data.newOwnerUserID]
+    );
   };
   getGroupApplicationListAsApplicant = (
-    data: GetGroupApplicationListParams = {
-      groupID: [],
+    data: GroupApplicationListParams = {
+      groupIDs: [],
       handleResults: [],
       offset: 0,
       count: 0,
     },
-    operationID = uuidv4()
+    operationID = uuidV4()
   ) => {
-    return this._invoker<GroupApplicationItem[]>(
+    return this.invokeCore<GroupApplicationItem[]>(
       'getGroupApplicationListAsApplicant ',
       window.getGroupApplicationListAsApplicant,
       [operationID, JSON.stringify(data)]
     );
   };
   getGroupApplicationListAsRecipient = (
-    data: GetGroupApplicationListParams = {
-      groupID: [],
+    data: GroupApplicationListParams = {
+      groupIDs: [],
       handleResults: [],
       offset: 0,
       count: 0,
     },
-    operationID = uuidv4()
+    operationID = uuidV4()
   ) => {
-    return this._invoker<GroupApplicationItem[]>(
+    return this.invokeCore<GroupApplicationItem[]>(
       'getGroupApplicationListAsRecipient ',
       window.getGroupApplicationListAsRecipient,
       [operationID, JSON.stringify(data)]
     );
   };
   getGroupApplicationUnhandledCount = (
-    data: GetSelfUnhandledApplyCountParams,
-    operationID = uuidv4()
+    data: ApplicationUnhandledCountParams,
+    operationID = uuidV4()
   ) => {
-    return this._invoker<number>(
+    return this.invokeCore<number>(
       'getGroupApplicationUnhandledCount ',
       window.getGroupApplicationUnhandledCount,
       [operationID, JSON.stringify(data)]
     );
   };
-  acceptGroupApplication = <T>(
-    data: AccessGroupApplicationParams,
-    operationID = uuidv4()
+  acceptGroupApplication = (
+    data: HandleGroupApplicationParams,
+    operationID = uuidV4()
   ) => {
-    return this._invoker<T>(
+    return this.invokeCore<void>(
       'acceptGroupApplication ',
       window.acceptGroupApplication,
       [operationID, data.groupID, data.fromUserID, data.handleMsg]
     );
   };
-  refuseGroupApplication = <T>(
-    data: AccessGroupApplicationParams,
-    operationID = uuidv4()
+  refuseGroupApplication = (
+    data: HandleGroupApplicationParams,
+    operationID = uuidV4()
   ) => {
-    return this._invoker<T>(
+    return this.invokeCore<void>(
       'refuseGroupApplication ',
       window.refuseGroupApplication,
       [operationID, data.groupID, data.fromUserID, data.handleMsg]
     );
   };
-  /**
-   * @deprecated Use setConversation instead.
-   */
-  resetConversationGroupAtType = <T>(data: string, operationID = uuidv4()) => {
-    return this._invoker<T>(
-      'resetConversationGroupAtType ',
-      window.setConversation,
-      [
-        operationID,
-        data,
-        JSON.stringify({
-          groupAtType: GroupAtType.AtNormal,
-        }),
-      ]
-    );
-  };
-  /**
-   * @deprecated Use setGroupMemberInfo instead.
-   */
-  setGroupMemberRoleLevel = <T>(
-    data: SetGroupRoleParams,
-    operationID = uuidv4()
-  ) => {
-    return this._invoker<T>(
-      'setGroupMemberRoleLevel ',
-      window.setGroupMemberInfo,
-      [
-        operationID,
-        JSON.stringify({
-          groupID: data.groupID,
-          userID: data.userID,
-          roleLevel: data.roleLevel,
-        }),
-      ]
-    );
-  };
-  /**
-   * @deprecated Use setGroupInfo instead.
-   */
-  setGroupVerification = <T>(
-    data: SetGroupVerificationParams,
-    operationID = uuidv4()
-  ) => {
-    return this._invoker<T>('setGroupVerification ', window.setGroupInfo, [
-      operationID,
-      JSON.stringify({
-        groupID: data.groupID,
-        needVerification: data.verification,
-      }),
-    ]);
-  };
-  getGroupMemberOwnerAndAdmin = (data: string, operationID = uuidv4()) => {
-    return this._invoker<GroupMemberItem[]>(
+  getGroupMemberOwnerAndAdmin = (data: string, operationID = uuidV4()) => {
+    return this.invokeCore<GroupMemberItem[]>(
       'getGroupMemberOwnerAndAdmin ',
       window.getGroupMemberOwnerAndAdmin,
       [operationID, data]
     );
   };
-  /**
-   * @deprecated Use setSelfInfo instead.
-   */
-  setGlobalRecvMessageOpt = <T>(
-    opt: MessageReceiveOptType,
-    operationID = uuidv4()
-  ) => {
-    return this._invoker<T>('setGlobalRecvMessageOpt ', window.setSelfInfo, [
+  getAtAllTag = (operationID = uuidV4()) => {
+    return this.invokeCore<string>('getAtAllTag', window.getAtAllTag, [
       operationID,
-      JSON.stringify({ globalRecvMsgOpt: opt }),
     ]);
   };
-  findMessageList = (data: FindMessageParams[], operationID = uuidv4()) => {
-    return this._invoker<SearchMessageResult>(
+  findMessageList = (data: FindMessageQuery[], operationID = uuidV4()) => {
+    return this.invokeCore<SearchMessageResult>(
       'findMessageList ',
       window.findMessageList,
       [operationID, JSON.stringify(data)]
     );
   };
-  uploadFile = (data: UploadFileParams, operationID = uuidv4()) => {
+  uploadFile = (data: UploadFileParams, operationID = uuidV4()) => {
     data.uuid = `${data.uuid}/${data.file?.name}`;
     window.fileMapSet(data.uuid, data.file);
-    return this._invoker<{ url: string }>('uploadFile ', window.uploadFile, [
+    return this.invokeCore<{ url: string }>('uploadFile ', window.uploadFile, [
       operationID,
       JSON.stringify({
         ...data,
@@ -1643,160 +1394,66 @@ class SDK extends Emitter {
       }),
     ]);
   };
-  subscribeUsersStatus = (data: string[], operationID = uuidv4()) => {
-    return this._invoker<UserOnlineState[]>(
+  updateFcmToken = (
+    fcmToken: string,
+    expireTime: number,
+    operationID = uuidV4()
+  ) => {
+    return this.invokeCore<void>('updateFcmToken', window.updateFcmToken, [
+      operationID,
+      fcmToken,
+      expireTime,
+    ]);
+  };
+  subscribeUsersStatus = (data: string[], operationID = uuidV4()) => {
+    return this.invokeCore<UserOnlineState[]>(
       'subscribeUsersStatus ',
       window.subscribeUsersStatus,
       [operationID, JSON.stringify(data)]
     );
   };
-  unsubscribeUsersStatus = (data: string[], operationID = uuidv4()) => {
-    return this._invoker<UserOnlineState[]>(
+  unsubscribeUsersStatus = (data: string[], operationID = uuidV4()) => {
+    return this.invokeCore<UserOnlineState[]>(
       'unsubscribeUsersStatus ',
       window.unsubscribeUsersStatus,
       [operationID, JSON.stringify(data)]
     );
   };
-  getUserStatus = (operationID = uuidv4()) => {
-    return this._invoker<UserOnlineState[]>(
+  getUserStatus = (data: string[], operationID = uuidV4()) => {
+    return this.invokeCore<UserOnlineState[]>(
       'getUserStatus ',
       window.getUserStatus,
-      [operationID]
+      [operationID, JSON.stringify(data)]
     );
   };
-  getSubscribeUsersStatus = (operationID = uuidv4()) => {
-    return this._invoker<UserOnlineState[]>(
+  getSubscribeUsersStatus = (operationID = uuidV4()) => {
+    return this.invokeCore<UserOnlineState[]>(
       'getSubscribeUsersStatus ',
       window.getSubscribeUsersStatus,
       [operationID]
     );
   };
-  signalingInvite = (data: SignalingInviteParams, operationID = uuidv4()) => {
-    return this._invoker<RtcInviteResults>(
-      'signalingInvite ',
-      window.signalingInvite,
-      [operationID, JSON.stringify(data)]
-    );
-  };
-  signalingInviteInGroup = (
-    data: SignalingInviteParams,
-    operationID = uuidv4()
-  ) => {
-    return this._invoker<RtcInviteResults>(
-      'signalingInviteInGroup ',
-      window.signalingInviteInGroup,
-      [operationID, JSON.stringify(data)]
-    );
-  };
-  signalingAccept = (data: RtcActionParams, operationID = uuidv4()) => {
-    return this._invoker<RtcInviteResults>(
-      'signalingAccept ',
-      window.signalingAccept,
-      [operationID, JSON.stringify(data)]
-    );
-  };
-  signalingReject = <T>(data: RtcActionParams, operationID = uuidv4()) => {
-    return this._invoker<T>('signalingReject ', window.signalingReject, [
-      operationID,
-      JSON.stringify(data),
-    ]);
-  };
-  signalingCancel = <T>(data: RtcActionParams, operationID = uuidv4()) => {
-    return this._invoker<T>('signalingCancel ', window.signalingCancel, [
-      operationID,
-      JSON.stringify(data),
-    ]);
-  };
-  signalingHungUp = <T>(data: RtcActionParams, operationID = uuidv4()) => {
-    return this._invoker<T>('signalingHungUp ', window.signalingHungUp, [
-      operationID,
-      JSON.stringify(data),
-    ]);
-  };
-  signalingGetRoomByGroupID = (groupID: string, operationID = uuidv4()) => {
-    return this._invoker<CallingRoomData>(
-      'signalingGetRoomByGroupID ',
-      window.signalingGetRoomByGroupID,
-      [operationID, groupID]
-    );
-  };
-  signalingGetTokenByRoomID = (roomID: string, operationID = uuidv4()) => {
-    return this._invoker<RtcInviteResults>(
-      'signalingGetTokenByRoomID ',
-      window.signalingGetTokenByRoomID,
-      [operationID, roomID]
-    );
-  };
-  getSignalingInvitationInfoStartApp = (operationID = uuidv4()) => {
-    return this._invoker<{
-      invitation: RtcInvite | null;
-      offlinePushInfo: OfflinePush;
-    }>(
-      'getSignalingInvitationInfoStartApp ',
-      window.getSignalingInvitationInfoStartApp,
-      [operationID]
-    );
-  };
-  signalingSendCustomSignal = <T>(
-    data: CustomSignalParams,
-    operationID = uuidv4()
-  ) => {
-    return this._invoker<T>(
-      'signalingSendCustomSignal ',
-      window.signalingSendCustomSignal,
-      [operationID, data.customInfo, data.roomID]
-    );
-  };
-  setConversationIsMsgDestruct = <T>(
-    data: SetConversationMsgDestructParams,
-    operationID = uuidv4()
-  ) => {
-    return this._invoker<T>(
-      'setConversationIsMsgDestruct ',
-      window.setConversation,
-      [
-        operationID,
-        data.conversationID,
-        JSON.stringify({ isMsgDestruct: data.isMsgDestruct }),
-      ]
-    );
-  };
-  setConversationMsgDestructTime = <T>(
-    data: SetConversationMsgDestructTimeParams,
-    operationID = uuidv4()
-  ) => {
-    return this._invoker<T>(
-      'setConversationMsgDestructTime ',
-      window.setConversation,
-      [
-        operationID,
-        data.conversationID,
-        JSON.stringify({
-          msgDestructTime: data.msgDestructTime,
-        }),
-      ]
-    );
-  };
-  fileMapSet = (uuid: string, file: File) => window.fileMapSet(uuid, file);
+  fileMapSet = (uuid: string, file: File): Promise<WorkerResponse<string>> =>
+    window.fileMapSet(uuid, file);
 }
 
-let instance: SDK;
+let instance: WasmSdk;
 
-export function getSDK(config?: WasmPathConfig): SDK {
+export function getSDK(config?: WasmPathConfig): WasmSdk {
   const {
     sqlWasmPath,
     coreWasmPath = '/openIM.wasm',
     debug = true,
   } = config || {};
   if (typeof window === 'undefined') {
-    return {} as SDK;
+    return {} as WasmSdk;
   }
 
   if (instance) {
     return instance;
   }
 
-  instance = new SDK(coreWasmPath, debug);
+  instance = new WasmSdk(coreWasmPath, debug);
 
   if (sqlWasmPath) {
     window.setSqlWasmPath(sqlWasmPath);

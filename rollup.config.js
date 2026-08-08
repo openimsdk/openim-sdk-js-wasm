@@ -6,7 +6,7 @@ import polyfillNode from 'rollup-plugin-polyfill-node';
 import terser from '@rollup/plugin-terser';
 
 const resolveExtensions = ['.mjs', '.js', '.json', '.node', '.ts', '.tsx'];
-const typescriptInclude = ['**/*.ts', '**/*.tsx', '**/*.cts', '**/*.mts'];
+const typescriptInclude = ['**/*.ts', '**/*.tsx', '**/*.cts', '**/*.mts', '**/*.d.ts'];
 
 export default [
   {

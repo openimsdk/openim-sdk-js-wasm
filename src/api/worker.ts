@@ -1,7 +1,7 @@
 import { RPC, RPCMessageEvent } from 'rpc-shooter';
 import {
   init,
-  close,
+  closeDB,
   // message
   getMessage,
   getMultipleMessage,
@@ -50,6 +50,8 @@ import {
   setConversationDraft,
   setMultipleConversationRecvMsgOpt,
   unPinConversation,
+  updateAllConversation,
+  updateOrCreateConversations,
 
   // users
   getLoginUser,
@@ -183,6 +185,7 @@ import {
   // upload
   updateUpload,
   deleteUpload,
+  deleteExpireUpload,
   getUpload,
   insertUpload,
   updateColumnsFriend,
@@ -228,10 +231,11 @@ rpc.registerMethod('getUpload', getUpload);
 rpc.registerMethod('insertUpload', insertUpload);
 rpc.registerMethod('updateUpload', updateUpload);
 rpc.registerMethod('deleteUpload', deleteUpload);
+rpc.registerMethod('deleteExpireUpload', deleteExpireUpload);
 
 rpc.registerMethod('setSqlWasmPath', setSqlWasmPath);
 rpc.registerMethod('initDB', init);
-rpc.registerMethod('close', close);
+rpc.registerMethod('closeDB', closeDB);
 
 // message
 rpc.registerMethod('getMessage', getMessage);
@@ -328,6 +332,8 @@ rpc.registerMethod('clearAllConversation', clearAllConversation);
 rpc.registerMethod('setConversationDraft', setConversationDraft);
 rpc.registerMethod('removeConversationDraft', removeConversationDraft);
 rpc.registerMethod('unPinConversation', unPinConversation);
+rpc.registerMethod('updateAllConversation', updateAllConversation);
+rpc.registerMethod('updateOrCreateConversations', updateOrCreateConversations);
 rpc.registerMethod('incrConversationUnreadCount', incrConversationUnreadCount);
 rpc.registerMethod(
   'setMultipleConversationRecvMsgOpt',
@@ -499,25 +505,11 @@ rpc.registerMethod('getExistTables', getExistTables);
 
 rpc.registerMethod('exec', async (sql: string) => {
   const db = await getInstance();
-
-  try {
-    const result = db.exec(sql);
-
-    console.info(`sql debug with exec sql = ${sql.trim()} , return `, result);
-  } catch (error) {
-    console.info(`sql debug with exec sql = ${sql} , return `, error);
-  }
+  return db.exec(sql);
 });
 rpc.registerMethod('getRowsModified', async () => {
   const db = await getInstance();
-
-  try {
-    const result = db.getRowsModified();
-
-    console.info('sql debug with getRowsModified return ', result);
-  } catch (error) {
-    console.info('sql debug with getRowsModified return ', error);
-  }
+  return db.getRowsModified();
 });
 
 rpc.registerMethod('exportDB', async () => {

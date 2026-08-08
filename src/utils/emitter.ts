@@ -1,12 +1,14 @@
-import { WSEvent } from '@/types/entity';
-import { CbEvents } from '../constant';
-import { DataOfEvent } from '../types/eventData';
+import { SdkEventEnvelope } from '@/types/entity';
+import { SdkEvent } from '../constant';
+import { SdkEventData } from '../types/eventData';
 
 interface Events {
   [key: string]: Cbfn<any>[];
 }
 
-type Cbfn<E extends CbEvents> = (data: WSEvent<DataOfEvent<E>>) => void;
+type Cbfn<E extends SdkEvent> = (
+  data: SdkEventEnvelope<SdkEventData<E>>
+) => void;
 
 class Emitter {
   private events: Events;
@@ -15,7 +17,7 @@ class Emitter {
     this.events = {};
   }
 
-  emit<E extends CbEvents>(event: E, data: WSEvent<DataOfEvent<E>>) {
+  emit<E extends SdkEvent>(event: E, data: SdkEventEnvelope<SdkEventData<E>>) {
     if (this.events[event]) {
       this.events[event].forEach(fn => {
         return fn(data);
@@ -25,7 +27,7 @@ class Emitter {
     return this;
   }
 
-  on<E extends CbEvents>(event: E, fn: Cbfn<E>) {
+  on<E extends SdkEvent>(event: E, fn: Cbfn<E>) {
     if (this.events[event]) {
       this.events[event].push(fn);
     } else {
@@ -35,7 +37,7 @@ class Emitter {
     return this;
   }
 
-  off<E extends CbEvents>(event: E, fn: Cbfn<E>) {
+  off<E extends SdkEvent>(event: E, fn: Cbfn<E>) {
     if (event && typeof fn === 'function' && this.events[event]) {
       const listeners = this.events[event];
       if (!listeners || listeners.length === 0) {

@@ -26,11 +26,7 @@ export async function getStrangerInfo(userIDListStr: string): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -57,7 +53,7 @@ export function setStrangerInfo(
     console.error(e);
 
     return Promise.resolve(
-      formatResponse(undefined, DatabaseErrorCode.ErrorInit, JSON.stringify(e))
+      formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e)
     );
   }
 }
@@ -79,10 +75,6 @@ export async function setSingleStrangerInfo(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }

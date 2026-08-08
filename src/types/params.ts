@@ -1,25 +1,25 @@
 import {
   MessageEntity,
   OfflinePush,
-  PicBaseInfo,
-  AtUsersInfoItem,
+  Picture,
+  AtUserInfo,
   MessageItem,
   SelfUserInfo,
-  RtcInvite,
   GroupItem,
+  SignalingInvitation,
 } from './entity';
 import {
   AllowType,
   GroupJoinSource,
   GroupVerificationType,
   MessageType,
-  MessageReceiveOptType,
+  MessageReceiveOption,
   GroupMemberRole,
   GroupMemberFilter,
-  LogLevel,
   GroupMessageReaderFilter,
-  GroupAtType,
-  ViewType,
+  LogLevel,
+  GroupMentionType,
+  MessageViewType,
 } from './enum';
 
 export type WasmPathConfig = {
@@ -28,7 +28,7 @@ export type WasmPathConfig = {
   debug?: boolean;
 };
 
-export type InitAndLoginConfig = {
+export type LoginParams = {
   userID: string;
   token: string;
   platformID: number;
@@ -40,47 +40,23 @@ export type InitAndLoginConfig = {
   tryParse?: boolean;
 };
 
-export type GetOneConversationParams = {
+export type ConversationSessionParams = {
   sourceID: string;
   sessionType: number;
 };
-export type GetAdvancedHistoryMsgParams = {
+export type GetAdvancedHistoryMessageListParams = {
   count: number;
-  viewType: ViewType;
+  viewType: MessageViewType;
   startClientMsgID: string;
   conversationID: string;
 };
-export type FetchSurroundingParams = {
-  startMessage: MessageItem;
-  viewType: ViewType;
-  before: number;
-  after: number;
-};
-export type GetHistoryMsgParams = {
-  userID: string;
-  groupID: string;
-  count: number;
-  startClientMsgID: string;
-  conversationID?: string;
-};
-export type SendGroupReadReceiptParams = {
-  conversationID: string;
-  clientMsgIDList: string[];
-};
-export type GetGroupMessageReaderParams = {
-  conversationID: string;
-  clientMsgID: string;
-  filter: GroupMessageReaderFilter;
-  offset: number;
-  count: number;
-};
-export type GetGroupMemberParams = {
+export type GetGroupMemberListParams = {
   groupID: string;
   filter: GroupMemberFilter;
   offset: number;
   count: number;
 };
-export type SendMsgParams = {
+export type SendMessageParams = {
   recvID: string;
   groupID: string;
   offlinePushInfo?: OfflinePush;
@@ -92,13 +68,13 @@ export type SetMessageLocalExParams = {
   clientMsgID: string;
   localEx: string;
 };
-export type ImageMsgParamsByURL = {
-  sourcePicture: PicBaseInfo;
-  bigPicture: PicBaseInfo;
-  snapshotPicture: PicBaseInfo;
+export type CreateImageMessageByURLParams = {
+  sourcePicture: Picture;
+  bigPicture: Picture;
+  snapshotPicture: Picture;
   sourcePath: string;
 };
-export type VideoMsgParamsByURL = {
+export type CreateVideoMessageByURLParams = {
   videoPath: string;
   duration: number;
   videoType: string;
@@ -113,34 +89,28 @@ export type VideoMsgParamsByURL = {
   snapshotHeight: number;
   snapShotType?: string;
 };
-export type VideoMsgParamsByFullPath = {
-  videoFullPath: string;
-  videoType: string;
-  duration: number;
-  snapshotFullPath: string;
-};
-export type CustomMsgParams = {
+export type CreateCustomMessageParams = {
   data: string;
   extension: string;
   description: string;
 };
-export type QuoteMsgParams = {
+export type CreateQuoteMessageParams = {
   text: string;
   message: string;
 };
-export type AdvancedQuoteMsgParams = {
+export type CreateAdvancedQuoteMessageParams = {
   text: string;
   message: MessageItem;
   messageEntityList?: MessageEntity[];
 };
-export type AdvancedMsgParams = {
+export type CreateAdvancedTextMessageParams = {
   text: string;
   messageEntityList?: MessageEntity[];
 };
 export type SetConversationParams = {
   conversationID: string;
-  recvMsgOpt?: MessageReceiveOptType;
-  groupAtType?: GroupAtType;
+  recvMsgOpt?: MessageReceiveOption;
+  groupAtType?: GroupMentionType;
   burnDuration?: number;
   msgDestructTime?: number;
   isPinned?: boolean;
@@ -148,11 +118,7 @@ export type SetConversationParams = {
   isMsgDestruct?: boolean;
   ex?: string;
 };
-export type SetConversationPrivateStateParams = {
-  conversationID: string;
-  isPrivate: boolean;
-};
-export type SplitConversationParams = {
+export type ConversationListPaginationParams = {
   offset: number;
   count: number;
 };
@@ -160,17 +126,13 @@ export type SetConversationDraftParams = {
   conversationID: string;
   draftText: string;
 };
-export type SetConversationPinParams = {
-  conversationID: string;
-  isPinned: boolean;
-};
 export type JoinGroupParams = {
   groupID: string;
   reqMsg: string;
   joinSource: GroupJoinSource;
   ex?: string;
 };
-export type SearchGroupParams = {
+export type SearchGroupsParams = {
   keywordList: string[];
   isSearchGroupID: boolean;
   isSearchGroupName: boolean;
@@ -184,35 +146,22 @@ export type ChangeGroupMemberMuteParams = {
   userID: string;
   mutedSeconds: number;
 };
-export type TransferGroupParams = {
+export type TransferGroupOwnerParams = {
   groupID: string;
   newOwnerUserID: string;
 };
-export type AccessGroupApplicationParams = {
+export type HandleGroupApplicationParams = {
   groupID: string;
   fromUserID: string;
   handleMsg: string;
 };
-export type SetGroupRoleParams = {
-  groupID: string;
-  userID: string;
-  roleLevel: GroupMemberRole;
-};
-export type SetGroupVerificationParams = {
-  verification: GroupVerificationType;
-  groupID: string;
-};
-export type SetBurnDurationParams = {
-  conversationID: string;
-  burnDuration: number;
-};
-export type AtMsgParams = {
+export type CreateTextAtMessageParams = {
   text: string;
   atUserIDList: string[];
-  atUsersInfo?: AtUsersInfoItem[];
+  atUsersInfo?: AtUserInfo[];
   message?: MessageItem;
 };
-export type SoundMsgParamsByURL = {
+export type CreateSoundMessageByURLParams = {
   uuid: string;
   soundPath: string;
   sourceUrl: string;
@@ -220,7 +169,7 @@ export type SoundMsgParamsByURL = {
   duration: number;
   soundType?: string;
 };
-export type FileMsgParamsByURL = {
+export type CreateFileMessageByURLParams = {
   filePath: string;
   fileName: string;
   uuid: string;
@@ -228,63 +177,47 @@ export type FileMsgParamsByURL = {
   fileSize: number;
   fileType?: string;
 };
-export type FileMsgParamsByFullPath = {
-  fileFullPath: string;
-  fileName: string;
-};
-export type SoundMsgParamsByFullPath = {
-  soundPath: string;
-  duration: number;
-};
-export type MergerMsgParams = {
+export type CreateMergerMessageParams = {
   messageList: MessageItem[];
   title: string;
   summaryList: string[];
 };
-export type FaceMessageParams = {
+export type CreateFaceMessageParams = {
   index: number;
   data: string;
 };
-export type LocationMsgParams = {
+export type CreateLocationMessageParams = {
   description: string;
   longitude: number;
   latitude: number;
 };
-export type InsertSingleMsgParams = {
+export type InsertSingleMessageToLocalStorageParams = {
   message: MessageItem;
   recvID: string;
   sendID: string;
 };
-export type InsertGroupMsgParams = {
+export type InsertGroupMessageToLocalStorageParams = {
   message: MessageItem;
   groupID: string;
   sendID: string;
 };
-export type AccessMessageParams = {
+export type ConversationMessageParams = {
   conversationID: string;
   clientMsgID: string;
 };
-export type TypingUpdateParams = {
-  recvID: string;
-  msgTip: string;
+export type MessageReadReceiptParams = {
+  conversationID: string;
+  clientMsgIDList: string[];
 };
 export type ChangeInputStatesParams = {
   conversationID: string;
   focus: boolean;
 };
-export type GetInputstatesParams = {
+export type GetInputStatesParams = {
   conversationID: string;
   userID: string;
 };
-export type SetConversationExParams = {
-  conversationID: string;
-  ex: string;
-};
-export type SetConversationRecvOptParams = {
-  conversationID: string;
-  opt: MessageReceiveOptType;
-};
-export type SearchLocalParams = {
+export type SearchLocalMessagesParams = {
   conversationID: string;
   keywordList: string[];
   keywordListMatchType?: number;
@@ -299,7 +232,7 @@ export type AddFriendParams = {
   toUserID: string;
   reqMsg: string;
 };
-export type SearchFriendParams = {
+export type SearchFriendsParams = {
   keywordList: string[];
   isSearchUserID: boolean;
   isSearchNickname: boolean;
@@ -315,19 +248,7 @@ export type UpdateFriendsParams = {
   remark?: string;
   ex?: string;
 };
-export type RemarkFriendParams = {
-  toUserID: string;
-  remark: string;
-};
-export type PinFriendParams = {
-  toUserIDs: string[];
-  isPinned: boolean;
-};
-export type SetFriendExParams = {
-  toUserIDs: string[];
-  ex: string;
-};
-export type AccessFriendApplicationParams = {
+export type HandleFriendApplicationParams = {
   toUserID: string;
   handleMsg: string;
 };
@@ -335,12 +256,14 @@ export type AddBlackParams = {
   toUserID: string;
   ex?: string;
 };
-export type AccessToGroupParams = {
+export type GroupMemberUserListParams = {
   groupID: string;
-  reason: string;
   userIDList: string[];
 };
-export type GetGroupMemberByTimeParams = {
+export type GroupMemberOperationParams = GroupMemberUserListParams & {
+  reason: string;
+};
+export type GetGroupMemberListByJoinTimeFilterParams = {
   groupID: string;
   filterUserIDList: string[];
   offset: number;
@@ -348,7 +271,7 @@ export type GetGroupMemberByTimeParams = {
   joinTimeBegin: number;
   joinTimeEnd: number;
 };
-export type SearchGroupMemberParams = {
+export type SearchGroupMembersParams = {
   groupID: string;
   keywordList: string[];
   isSearchUserID: boolean;
@@ -356,11 +279,7 @@ export type SearchGroupMemberParams = {
   offset: number;
   count: number;
 };
-export type SetMemberPermissionParams = {
-  rule: AllowType;
-  groupID: string;
-};
-export type OffsetParams = {
+export type PaginationParams = {
   offset: number;
   count: number;
 };
@@ -370,12 +289,7 @@ export type CreateGroupParams = {
   adminUserIDs?: string[];
   ownerUserID?: string;
 };
-export type SetGroupMemberNickParams = {
-  groupID: string;
-  userID: string;
-  groupMemberNickname: string;
-};
-export type UpdateMemberInfoParams = {
+export type SetGroupMemberInfoParams = {
   groupID: string;
   userID: string;
   nickname?: string;
@@ -383,7 +297,7 @@ export type UpdateMemberInfoParams = {
   roleLevel?: GroupMemberRole;
   ex?: string;
 };
-export type FindMessageParams = {
+export type FindMessageQuery = {
   conversationID: string;
   clientMsgIDList: string[];
 };
@@ -395,33 +309,15 @@ export type UploadFileParams = {
   filepath?: string;
   cause?: string;
 };
-export type PartialUserItem = Partial<SelfUserInfo>;
+export type SetSelfInfoParams = Partial<
+  Pick<
+    SelfUserInfo,
+    'nickname' | 'faceURL' | 'ex' | 'globalRecvMsgOpt' | 'addFriendPermission'
+  >
+>;
 
-export type SignalingInviteParams = {
-  invitation: RtcInvite;
-  offlinePushInfo?: OfflinePush;
-};
-export type RtcActionParams = {
-  opUserID: string;
-  invitation: RtcInvite;
-};
-export type CustomSignalParams = {
-  roomID: string;
-  customInfo: string;
-};
-
-export type SetConversationMsgDestructParams = {
-  conversationID: string;
-  isMsgDestruct: boolean;
-};
-
-export type SetConversationMsgDestructTimeParams = {
-  conversationID: string;
-  msgDestructTime: number;
-};
-
-export type GetGroupApplicationListParams = {
-  groupID: string[];
+export type GroupApplicationListParams = {
+  groupIDs: string[];
   handleResults: number[];
   offset: number;
   count: number;
@@ -433,15 +329,233 @@ export type GetFriendApplicationListAsRecipientParams = {
   count: number;
 };
 
-export type GetFriendApplicationListAsApplicationParams = {
+export type GetFriendApplicationListAsApplicantParams = {
   offset: number;
   count: number;
 };
 
-export type GetFriendApplicationUnhandledCountParams = {
+export type ApplicationUnhandledCountParams = {
   time: number;
 };
 
-export type GetSelfUnhandledApplyCountParams = {
-  time: number;
+// Compatibility names retained for applications upgrading from patch.10.
+/** @deprecated Use `LoginParams` instead. */
+export type InitAndLoginConfig = LoginParams;
+/** @deprecated Use `ConversationSessionParams` instead. */
+export type GetOneConversationParams = ConversationSessionParams;
+/** @deprecated Use `GetAdvancedHistoryMessageListParams` instead. */
+export type GetAdvancedHistoryMsgParams = GetAdvancedHistoryMessageListParams;
+/** @deprecated Use the Core-aligned surrounding-message parameters instead. */
+export type FetchSurroundingParams = {
+  startMessage: MessageItem;
+  viewType: MessageViewType;
+  before: number;
+  after: number;
 };
+/** @deprecated Use the Core-aligned history-message parameters instead. */
+export type GetHistoryMsgParams = {
+  userID: string;
+  groupID: string;
+  count: number;
+  startClientMsgID: string;
+  conversationID?: string;
+};
+/** @deprecated Use `MessageReadReceiptParams` instead. */
+export type SendGroupReadReceiptParams = MessageReadReceiptParams;
+/** @deprecated Use the Core-aligned group reader parameters instead. */
+export type GetGroupMessageReaderParams = {
+  conversationID: string;
+  clientMsgID: string;
+  filter: GroupMessageReaderFilter;
+  offset: number;
+  count: number;
+};
+/** @deprecated Use `GetGroupMemberListParams` instead. */
+export type GetGroupMemberParams = GetGroupMemberListParams;
+/** @deprecated Use `SendMessageParams` instead. */
+export type SendMsgParams = SendMessageParams;
+/** @deprecated Use `CreateImageMessageByURLParams` instead. */
+export type ImageMsgParamsByURL = CreateImageMessageByURLParams;
+/** @deprecated Use `CreateVideoMessageByURLParams` instead. */
+export type VideoMsgParamsByURL = CreateVideoMessageByURLParams;
+/** @deprecated Use the Core-aligned video message parameters instead. */
+export type VideoMsgParamsByFullPath = {
+  videoFullPath: string;
+  videoType: string;
+  duration: number;
+  snapshotFullPath: string;
+};
+/** @deprecated Use `CreateCustomMessageParams` instead. */
+export type CustomMsgParams = CreateCustomMessageParams;
+/** @deprecated Use `CreateQuoteMessageParams` instead. */
+export type QuoteMsgParams = CreateQuoteMessageParams;
+/** @deprecated Use `CreateAdvancedQuoteMessageParams` instead. */
+export type AdvancedQuoteMsgParams = CreateAdvancedQuoteMessageParams;
+/** @deprecated Use `CreateAdvancedTextMessageParams` instead. */
+export type AdvancedMsgParams = CreateAdvancedTextMessageParams;
+/** @deprecated Use `SetConversationParams` instead. */
+export type SetConversationPrivateStateParams = {
+  conversationID: string;
+  isPrivate: boolean;
+};
+/** @deprecated Use `ConversationListPaginationParams` instead. */
+export type SplitConversationParams = ConversationListPaginationParams;
+/** @deprecated Use `SetConversationParams` instead. */
+export type SetConversationPinParams = {
+  conversationID: string;
+  isPinned: boolean;
+};
+/** @deprecated Use `SearchGroupsParams` instead. */
+export type SearchGroupParams = SearchGroupsParams;
+/** @deprecated Use `TransferGroupOwnerParams` instead. */
+export type TransferGroupParams = TransferGroupOwnerParams;
+/** @deprecated Use `HandleGroupApplicationParams` instead. */
+export type AccessGroupApplicationParams = HandleGroupApplicationParams;
+/** @deprecated Use `SetGroupMemberInfoParams` instead. */
+export type SetGroupRoleParams = {
+  groupID: string;
+  userID: string;
+  roleLevel: GroupMemberRole;
+};
+/** @deprecated Use the Core-aligned group verification parameters instead. */
+export type SetGroupVerificationParams = {
+  verification: GroupVerificationType;
+  groupID: string;
+};
+/** @deprecated Use `SetConversationParams` instead. */
+export type SetBurnDurationParams = {
+  conversationID: string;
+  burnDuration: number;
+};
+/** @deprecated Use `CreateTextAtMessageParams` instead. */
+export type AtMsgParams = CreateTextAtMessageParams;
+/** @deprecated Use `CreateSoundMessageByURLParams` instead. */
+export type SoundMsgParamsByURL = CreateSoundMessageByURLParams;
+/** @deprecated Use `CreateFileMessageByURLParams` instead. */
+export type FileMsgParamsByURL = CreateFileMessageByURLParams;
+/** @deprecated Use the Core-aligned file message parameters instead. */
+export type FileMsgParamsByFullPath = {
+  fileFullPath: string;
+  fileName: string;
+};
+/** @deprecated Use the Core-aligned sound message parameters instead. */
+export type SoundMsgParamsByFullPath = {
+  soundPath: string;
+  duration: number;
+};
+/** @deprecated Use `CreateMergerMessageParams` instead. */
+export type MergerMsgParams = CreateMergerMessageParams;
+/** @deprecated Use `CreateFaceMessageParams` instead. */
+export type FaceMessageParams = CreateFaceMessageParams;
+/** @deprecated Use `CreateLocationMessageParams` instead. */
+export type LocationMsgParams = CreateLocationMessageParams;
+/** @deprecated Use `InsertSingleMessageToLocalStorageParams` instead. */
+export type InsertSingleMsgParams = InsertSingleMessageToLocalStorageParams;
+/** @deprecated Use `InsertGroupMessageToLocalStorageParams` instead. */
+export type InsertGroupMsgParams = InsertGroupMessageToLocalStorageParams;
+/** @deprecated Use `ConversationMessageParams` instead. */
+export type AccessMessageParams = ConversationMessageParams;
+/** @deprecated Use `ChangeInputStatesParams` instead. */
+export type TypingUpdateParams = {
+  recvID: string;
+  msgTip: string;
+};
+/** @deprecated Use `GetInputStatesParams` instead. */
+export type GetInputstatesParams = GetInputStatesParams;
+/** @deprecated Use `SetConversationParams` instead. */
+export type SetConversationExParams = {
+  conversationID: string;
+  ex: string;
+};
+/** @deprecated Use `SetConversationParams` instead. */
+export type SetConversationRecvOptParams = {
+  conversationID: string;
+  opt: MessageReceiveOption;
+};
+/** @deprecated Use `SearchLocalMessagesParams` instead. */
+export type SearchLocalParams = SearchLocalMessagesParams;
+/** @deprecated Use `SearchFriendsParams` instead. */
+export type SearchFriendParams = SearchFriendsParams;
+/** @deprecated Use `UpdateFriendsParams` instead. */
+export type RemarkFriendParams = {
+  toUserID: string;
+  remark: string;
+};
+/** @deprecated Use `UpdateFriendsParams` instead. */
+export type PinFriendParams = {
+  toUserIDs: string[];
+  isPinned: boolean;
+};
+/** @deprecated Use `UpdateFriendsParams` instead. */
+export type SetFriendExParams = {
+  toUserIDs: string[];
+  ex: string;
+};
+/** @deprecated Use `HandleFriendApplicationParams` instead. */
+export type AccessFriendApplicationParams = HandleFriendApplicationParams;
+/** @deprecated Use `GroupMemberOperationParams` instead. */
+export type AccessToGroupParams = GroupMemberOperationParams;
+/** @deprecated Use `GetGroupMemberListByJoinTimeFilterParams` instead. */
+export type GetGroupMemberByTimeParams =
+  GetGroupMemberListByJoinTimeFilterParams;
+/** @deprecated Use `SearchGroupMembersParams` instead. */
+export type SearchGroupMemberParams = SearchGroupMembersParams;
+/** @deprecated Use the Core-aligned group permission parameters instead. */
+export type SetMemberPermissionParams = {
+  rule: AllowType;
+  groupID: string;
+};
+/** @deprecated Use `PaginationParams` instead. */
+export type OffsetParams = PaginationParams;
+/** @deprecated Use `SetGroupMemberInfoParams` instead. */
+export type SetGroupMemberNickParams = {
+  groupID: string;
+  userID: string;
+  groupMemberNickname: string;
+};
+/** @deprecated Use `SetGroupMemberInfoParams` instead. */
+export type UpdateMemberInfoParams = SetGroupMemberInfoParams;
+/** @deprecated Use `FindMessageQuery` instead. */
+export type FindMessageParams = FindMessageQuery;
+/** @deprecated Use `SetSelfInfoParams` instead. */
+export type PartialUserItem = Partial<SelfUserInfo>;
+/** @deprecated Use the Core-aligned signaling invitation parameters instead. */
+export type SignalingInviteParams = {
+  invitation: SignalingInvitation;
+  offlinePushInfo?: OfflinePush;
+};
+/** @deprecated Use the Core-aligned signaling action parameters instead. */
+export type RtcActionParams = {
+  opUserID: string;
+  invitation: SignalingInvitation;
+};
+/** @deprecated Use the Core-aligned custom signaling parameters instead. */
+export type CustomSignalParams = {
+  roomID: string;
+  customInfo: string;
+};
+/** @deprecated Use `SetConversationParams` instead. */
+export type SetConversationMsgDestructParams = {
+  conversationID: string;
+  isMsgDestruct: boolean;
+};
+/** @deprecated Use `SetConversationParams` instead. */
+export type SetConversationMsgDestructTimeParams = {
+  conversationID: string;
+  msgDestructTime: number;
+};
+/** @deprecated Use `GroupApplicationListParams` instead. */
+export type GetGroupApplicationListParams = {
+  groupID: string[];
+  handleResults: number[];
+  offset: number;
+  count: number;
+};
+/** @deprecated Use `GetFriendApplicationListAsApplicantParams` instead. */
+export type GetFriendApplicationListAsApplicationParams =
+  GetFriendApplicationListAsApplicantParams;
+/** @deprecated Use `ApplicationUnhandledCountParams` instead. */
+export type GetFriendApplicationUnhandledCountParams =
+  ApplicationUnhandledCountParams;
+/** @deprecated Use `ApplicationUnhandledCountParams` instead. */
+export type GetSelfUnhandledApplyCountParams = ApplicationUnhandledCountParams;

@@ -93,18 +93,14 @@ export async function init(userId: string, dir: string): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   } finally {
     // console.timeEnd('SDK => (performance measure) init database used ');
   }
 }
 
-export async function close() {
-  // console.info('=> (database api) invoke close');
+export async function closeDB() {
+  // console.info('=> (database api) invoke closeDB');
 
   try {
     await resetInstance();
@@ -113,10 +109,6 @@ export async function close() {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }

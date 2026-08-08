@@ -31,11 +31,7 @@ export async function getBlackList(): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -49,11 +45,7 @@ export async function getBlackListUserID(): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -74,11 +66,7 @@ export async function getBlackInfoByBlockUserID(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -97,11 +85,7 @@ export async function getBlackInfoList(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -122,11 +106,7 @@ export async function insertBlack(localBlackStr: string): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
@@ -143,21 +123,27 @@ export async function deleteBlack(
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }
 
-export async function updateBlack(localBlackStr: string): Promise<string> {
+export async function updateBlack(
+  ownerUserID: string,
+  blockUserID: string,
+  localBlackStr: string
+): Promise<string> {
   try {
     const db = await getInstance();
 
-    const localBlack = convertToSnakeCaseObject(
-      convertObjectField(JSON.parse(localBlackStr))
-    ) as LocalBlack;
+    const localBlack = {
+      ...convertToSnakeCaseObject(
+        convertObjectField(JSON.parse(localBlackStr), {
+          userID: 'block_user_id',
+        })
+      ),
+      owner_user_id: ownerUserID,
+      block_user_id: blockUserID,
+    } as LocalBlack;
 
     databaseupdateBlack(db, localBlack);
 
@@ -165,10 +151,6 @@ export async function updateBlack(localBlackStr: string): Promise<string> {
   } catch (e) {
     console.error(e);
 
-    return formatResponse(
-      undefined,
-      DatabaseErrorCode.ErrorInit,
-      JSON.stringify(e)
-    );
+    return formatResponse(undefined, DatabaseErrorCode.InitializationFailed, e);
   }
 }

@@ -1,5 +1,7 @@
 import squel from 'squel';
 import { Database, QueryExecResult } from '@jlongster/sql.js';
+import { execPreparedQuery } from '@/utils';
+import { GroupMemberRole } from '@/types/enum';
 
 export type LocalGroupMember = { [key: string]: any };
 
@@ -92,11 +94,11 @@ export function getGroupAdminID(
   groupID: string
 ): QueryExecResult[] {
   return db.exec(
-    `
-    SELECT user_id FROM local_group_members 
-    WHERE group_id = "${groupID}" 
-    And role_level = 3
-      `
+    `SELECT user_id
+       FROM local_group_members
+      WHERE group_id = ?
+        AND role_level = ?`,
+    [groupID, GroupMemberRole.Admin]
   );
 }
 
@@ -117,8 +119,7 @@ export function getGroupMemberListSplit(
   groupID: string,
   filter: number,
   offset: number,
-  count: number,
-  loginUserID: string
+  count: number
 ): QueryExecResult[] {
   let condition = `
     SELECT * FROM local_group_members 
@@ -167,14 +168,6 @@ export function getGroupMemberListSplit(
             WHERE group_id = "${groupID}" 
             And ( role_level = 100 OR role_level = 60 )  
         ORDER BY role_level DESC,join_time ASC 
-        LIMIT ${count} OFFSET ${offset}
-        `;
-  }
-  if (filter === 6) {
-    condition = `
-        SELECT * FROM local_group_members 
-            WHERE group_id = "${groupID}" 
-            And user_id != "${loginUserID}" 
         LIMIT ${count} OFFSET ${offset}
         `;
   }
@@ -246,12 +239,12 @@ export function getGroupMemberOwnerAndAdmin(
   groupID: string
 ): QueryExecResult[] {
   return db.exec(
-    `
-      SELECT * FROM local_group_members 
-      WHERE group_id = "${groupID}" 
-      And role_level > 1 
-      ORDER BY role_level DESC
-        `
+    `SELECT *
+       FROM local_group_members
+      WHERE group_id = ?
+        AND role_level IN (?, ?)
+      ORDER BY join_time DESC`,
+    [groupID, GroupMemberRole.Owner, GroupMemberRole.Admin]
   );
 }
 
@@ -260,11 +253,11 @@ export function getGroupMemberOwner(
   groupID: string
 ): QueryExecResult[] {
   return db.exec(
-    `
-      SELECT * FROM local_group_members 
-      WHERE group_id = "${groupID}" 
-      And role_level = 2
-        `
+    `SELECT *
+       FROM local_group_members
+      WHERE group_id = ?
+        AND role_level = ?`,
+    [groupID, GroupMemberRole.Owner]
   );
 }
 
@@ -306,11 +299,12 @@ export function getGroupOwnerAndAdminByGroupID(
   groupID: string
 ): QueryExecResult[] {
   return db.exec(
-    `
-      SELECT * FROM local_group_members 
-      WHERE group_id = "${groupID}" 
-      And role_level > 1
-        `
+    `SELECT *
+       FROM local_group_members
+      WHERE group_id = ?
+        AND role_level IN (?, ?)
+      ORDER BY join_time DESC`,
+    [groupID, GroupMemberRole.Owner, GroupMemberRole.Admin]
   );
 }
 
@@ -419,63 +413,42 @@ export function searchGroupMembers(
   offset: number,
   count: number
 ): QueryExecResult[] {
-  let condition = '';
+  if (!isSearchMemberNickname && !isSearchUserID) {
+    throw new Error(
+      'isSearchMemberNickname and isSearchUserID cannot both be false'
+    );
+  }
+
+  const where: string[] = [];
+  const bindings: Array<string | number> = [];
+  const keywordPattern = `%${keyword}%`;
+
+  if (isSearchMemberNickname && isSearchUserID) {
+    where.push('(user_id LIKE ? OR nickname LIKE ?)');
+    bindings.push(keywordPattern, keywordPattern);
+  } else if (isSearchUserID) {
+    where.push('user_id LIKE ?');
+    bindings.push(keywordPattern);
+  } else {
+    where.push('nickname LIKE ?');
+    bindings.push(keywordPattern);
+  }
 
   if (groupID) {
-    if (isSearchMemberNickname && isSearchUserID) {
-      condition = `
-            SELECT * FROM local_group_members 
-            WHERE ( user_id like "%${keyword}%" or nickname like "%${keyword}%"  ) 
-            and group_id IN ("${groupID}")  
-            ORDER BY join_time DESC 
-            LIMIT ${count} OFFSET ${offset}
-            `;
-    } else if (!isSearchMemberNickname && !isSearchUserID) {
-      condition = `
-        SELECT * FROM local_group_members 
-        WHERE group_id IN ("${groupID}")  
-        ORDER BY join_time DESC 
-        LIMIT ${count} OFFSET ${offset}
-        `;
-    } else {
-      const subCondition = isSearchMemberNickname
-        ? `nickname like "%${keyword}%"`
-        : `user_id like "%${keyword}%"`;
-      condition = `
-            SELECT * FROM local_group_members 
-            WHERE ${subCondition}
-            and group_id IN ("${groupID}")  
-            ORDER BY join_time DESC 
-            LIMIT ${count} OFFSET ${offset}
-            `;
-    }
-  } else {
-    if (isSearchMemberNickname && isSearchMemberNickname) {
-      condition = `
-        SELECT * FROM local_group_members 
-        WHERE user_id like "%${keyword}%" or nickname like "%${keyword}%"  
-        ORDER BY join_time DESC 
-        LIMIT ${count} OFFSET ${offset}
-        `;
-    } else if (!isSearchMemberNickname && !isSearchMemberNickname) {
-      condition = `
-        SELECT * FROM local_group_members 
-        ORDER BY join_time DESC 
-        LIMIT ${count} OFFSET ${offset}
-        `;
-    } else {
-      const subCondition = isSearchMemberNickname
-        ? `nickname like "%${keyword}%"`
-        : `user_id like "%${keyword}%"`;
-      condition = `
-        SELECT * FROM local_group_members 
-        WHERE ${subCondition}  
-        ORDER BY join_time DESC 
-        LIMIT ${count} OFFSET ${offset}
-        `;
-    }
+    where.push('group_id = ?');
+    bindings.push(groupID);
   }
-  return db.exec(condition);
+
+  return execPreparedQuery(
+    db,
+    `
+      SELECT * FROM local_group_members
+      WHERE ${where.join(' AND ')}
+      ORDER BY role_level DESC, join_time ASC
+      LIMIT ? OFFSET ?
+    `,
+    [...bindings, count, offset]
+  );
 }
 
 export function getUserJoinedGroupIDs(
